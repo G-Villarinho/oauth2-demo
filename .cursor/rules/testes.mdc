@@ -1,0 +1,193 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Orientações para Escrita de Testes
+
+## Estrutura e Nomenclatura
+
+### Nomenclatura de Arquivos
+- Para um serviço `auth.go` → arquivo de teste: `auth_test.go`
+- Para um repositório `user_repository.go` → arquivo de teste: `user_repository_test.go`
+- Para um handler `auth_handler.go` → arquivo de teste: `auth_handler_test.go`
+
+### Estrutura dos Métodos de Teste
+- **Um método de teste para cada método do serviço/repositório**
+- Nome do método: `Test[NomeDoMétodo]`
+- Exemplo: `TestLogin`, `TestAuthenticate`, `TestSendVerificationCode`
+
+### Uso de `t.Run()` para Subtestes
+- Dentro de cada método de teste, use `t.Run()` com descrições descritivas
+- Formato: `t.Run("should [descrição do comportamento esperado]", func(t *testing.T) { ... })`
+- Exemplos:
+  - `t.Run("should return success when valid credentials are provided", func(t *testing.T) { ... })`
+  - `t.Run("should return error when email is invalid", func(t *testing.T) { ... })`
+  - `t.Run("should return error when OTP code is expired", func(t *testing.T) { ... })`
+
+## Padrão de Estrutura dos Testes
+
+```go
+func TestLogin(t *testing.T) {
+    t.Run("should return success when valid credentials are provided", func(t *testing.T) {
+        // Arrange
+        // Setup mocks, test data, etc.
+        
+        // Act
+        // Call the method being tested
+        
+        // Assert
+        // Verify results
+    })
+    
+    t.Run("should return error when email is invalid", func(t *testing.T) {
+        // Arrange
+        // Act
+        // Assert
+    })
+    
+    t.Run("should return error when password is incorrect", func(t *testing.T) {
+        // Arrange
+        // Act
+        // Assert
+    })
+}
+```
+
+## Boas Práticas Adicionais
+
+### 1. Organização dos Testes (AAA Pattern)
+- **Arrange**: Preparar dados, mocks e dependências
+- **Act**: Executar o método sendo testado
+- **Assert**: Verificar os resultados esperados
+
+### 2. Uso de Mocks
+- Utilize os mocks gerados na pasta `mocks/`
+- Configure expectativas claras nos mocks
+- Verifique se todas as expectativas foram atendidas
+
+### 3. Nomes Descritivos
+- Use nomes que descrevem o cenário e resultado esperado
+- Evite nomes genéricos como "test1", "test2"
+- Exemplos bons:
+  - `"should return user when valid ID is provided"`
+  - `"should return error when user not found"`
+  - `"should validate email format correctly"`
+
+### 4. Cobertura de Cenários
+- Teste casos de sucesso
+- Teste casos de erro
+- Teste casos extremos (valores vazios, nulos, etc.)
+- Teste validações de entrada
+
+### 5. Setup e Teardown
+- Use `t.Cleanup()` para limpeza automática
+- Configure mocks no início de cada subteste
+- Evite dependências entre testes
+
+### 6. Assertions
+- Use `assert` e `require` do testify
+- Use `require` para condições que devem parar o teste se falharem
+- Use `assert` para verificações que podem continuar o teste
+
+### 7. Dados de Teste
+- Crie dados de teste realistas
+- Use factories ou helpers para criar dados de teste
+- Evite dados hardcoded quando possível
+
+## Exemplo Completo
+
+```go
+func TestAuthenticate(t *testing.T) {
+    t.Run("should return authentication success when valid OTP code is provided", func(t *testing.T) {
+        // Arrange
+        ctx := context.Background()
+        code := "123456"
+        otpID := "test-otp-id"
+        
+        mockOTPService := mocks.NewOTPServiceMock(t)
+        mockOTPService.EXPECT().
+            ValidateOTP(ctx, code, otpID).
+            Return(true, nil)
+        
+        authService := NewAuthService(mockOTPService)
+        
+        // Act
+        result, err := authService.Authenticate(ctx, code, otpID)
+        
+        // Assert
+        require.NoError(t, err)
+        assert.NotNil(t, result)
+        assert.True(t, result.Success)
+    })
+    
+    t.Run("should return error when OTP code is invalid", func(t *testing.T) {
+        // Arrange
+        ctx := context.Background()
+        code := "invalid"
+        otpID := "test-otp-id"
+        
+        mockOTPService := mocks.NewOTPServiceMock(t)
+        mockOTPService.EXPECT().
+            ValidateOTP(ctx, code, otpID).
+            Return(false, errors.New("invalid OTP"))
+        
+        authService := NewAuthService(mockOTPService)
+        
+        // Act
+        result, err := authService.Authenticate(ctx, code, otpID)
+        
+        // Assert
+        require.Error(t, err)
+        assert.Nil(t, result)
+        assert.Contains(t, err.Error(), "invalid OTP")
+    })
+    
+    t.Run("should return error when OTP code is expired", func(t *testing.T) {
+        // Arrange
+        ctx := context.Background()
+        code := "123456"
+        otpID := "expired-otp-id"
+        
+        mockOTPService := mocks.NewOTPServiceMock(t)
+        mockOTPService.EXPECT().
+            ValidateOTP(ctx, code, otpID).
+            Return(false, errors.New("OTP expired"))
+        
+        authService := NewAuthService(mockOTPService)
+        
+        // Act
+        result, err := authService.Authenticate(ctx, code, otpID)
+        
+        // Assert
+        require.Error(t, err)
+        assert.Nil(t, result)
+        assert.Contains(t, err.Error(), "OTP expired")
+    })
+}
+```
+
+## Comandos Úteis
+
+### Executar Testes
+```bash
+# Executar todos os testes
+go test ./...
+
+# Executar testes de um pacote específico
+go test ./services
+
+# Executar testes com coverage
+go test -cover ./...
+
+# Executar testes com verbose
+go test -v ./services
+```
+
+### Gerar Mocks
+```bash
+# Gerar mocks para interfaces
+mockery --dir=services --name=AuthService --output=mocks
+```
+
+Siga estas orientações para manter consistência e qualidade nos testes do projeto.
