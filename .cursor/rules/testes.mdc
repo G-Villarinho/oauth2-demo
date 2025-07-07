@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.go
 alwaysApply: false
 ---
 # Orientações para Escrita de Testes
