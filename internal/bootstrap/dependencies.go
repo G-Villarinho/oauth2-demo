@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/aetheris-lab/aetheris-id/api/internal/handlers"
+	"github.com/aetheris-lab/aetheris-id/api/internal/middlewares"
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 	"github.com/aetheris-lab/aetheris-id/api/internal/server"
 	"github.com/aetheris-lab/aetheris-id/api/internal/services"
@@ -27,4 +28,6 @@ func BuildContainer(container *dig.Container) {
 	// Server
 	injector.Provide(container, server.NewServer)
 
+	// Middlewares
+	injector.Provide(container, middlewares.NewAuthMiddleware)
 }

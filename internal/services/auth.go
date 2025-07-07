@@ -50,7 +50,8 @@ func (s *authService) SendVerificationCode(ctx context.Context, email string) (*
 	// TODO: Send email with token
 
 	return &models.SendVerificationCodeResponse{
-		OTPToken: token,
+		OTPToken:  token,
+		ExpiresAt: otp.ExpiresAt,
 	}, nil
 }
 
@@ -74,5 +75,6 @@ func (s *authService) Authenticate(ctx context.Context, code, otpID string) (*mo
 
 	return &models.AuthenticateResponse{
 		AccessToken: token,
+		ExpiresAt:   expiresAt,
 	}, nil
 }

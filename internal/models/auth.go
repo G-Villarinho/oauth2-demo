@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type LoginPayload struct {
 	Email string `json:"email" validate:"required,email"`
 }
@@ -9,9 +11,11 @@ type AuthenticatePayload struct {
 }
 
 type SendVerificationCodeResponse struct {
-	OTPToken string
+	OTPToken  string
+	ExpiresAt time.Time
 }
 
 type AuthenticateResponse struct {
 	AccessToken string
+	ExpiresAt   time.Time
 }
