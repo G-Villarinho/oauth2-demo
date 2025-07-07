@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -29,7 +30,7 @@ func (s *clientService) CreateClient(ctx context.Context, name string, descripti
 	clientId := s.generateClientID(name)
 
 	clientFromClientID, err := s.clientRepo.GetByClientID(ctx, clientId)
-	if err != nil {
+	if err != nil && !errors.Is(err, models.ErrClientNotFound) {
 		return nil, fmt.Errorf("get client by client_id: %w", err)
 	}
 

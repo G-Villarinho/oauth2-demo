@@ -31,8 +31,8 @@ type Client struct {
 type CreateClientPayload struct {
 	Name         string   `json:"name" validate:"required"`
 	Description  string   `json:"description" validate:"required"`
-	RedirectURIs []string `json:"redirect_uris" validate:"required"`
-	GrantTypes   []string `json:"grant_types" validate:"required"`
+	RedirectURIs []string `json:"redirect_uris" validate:"required,min=1,dive,uri"`
+	GrantTypes   []string `json:"grant_types" validate:"required,min=1,dive,oneof=authorization_code refresh_token"`
 }
 
 type ClientResponse struct {
