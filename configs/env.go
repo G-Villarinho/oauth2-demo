@@ -22,7 +22,7 @@ type Environment struct {
 }
 
 type Server struct {
-	Port string `env:"SERVER_PORT,default=8080"`
+	Port int    `env:"SERVER_PORT,default=8080"`
 	Host string `env:"SERVER_HOST,default=localhost"`
 }
 

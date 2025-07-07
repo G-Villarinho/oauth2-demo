@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
@@ -36,7 +35,7 @@ func (r *clientRepository) Create(ctx context.Context, client *entities.Client) 
 	}
 
 	if _, err := r.collection.InsertOne(ctx, client); err != nil {
-		return fmt.Errorf("failed to create client: %w", err)
+		return err
 	}
 
 	return nil

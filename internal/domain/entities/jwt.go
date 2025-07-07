@@ -13,7 +13,6 @@ type AccessTokenClaims struct {
 	Email     string
 }
 
-// GetFullName retorna o nome completo do usuário do token
 func (a *AccessTokenClaims) GetFullName() string {
 	return a.FirstName + " " + a.LastName
 }

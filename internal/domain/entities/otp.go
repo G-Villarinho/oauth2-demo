@@ -21,17 +21,14 @@ type OTP struct {
 	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 }
 
-// IsExpired verifica se o OTP expirou
 func (o *OTP) IsExpired() bool {
 	return time.Now().After(o.ExpiresAt)
 }
 
-// IsValid verifica se o OTP é válido (não expirado)
 func (o *OTP) IsValid() bool {
 	return !o.IsExpired()
 }
 
-// ValidateCode verifica se o código fornecido é válido
 func (o *OTP) ValidateCode(code string) error {
 	if o.IsExpired() {
 		return ErrOTPExpired
@@ -44,7 +41,6 @@ func (o *OTP) ValidateCode(code string) error {
 	return nil
 }
 
-// GetTimeUntilExpiration retorna o tempo restante até a expiração
 func (o *OTP) GetTimeUntilExpiration() time.Duration {
-	return o.ExpiresAt.Sub(time.Now())
+	return time.Until(o.ExpiresAt)
 }

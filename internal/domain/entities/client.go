@@ -28,32 +28,26 @@ type Client struct {
 	UpdatedAt    *time.Time         `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
 }
 
-// IsValidRedirectURI verifica se a URI de redirecionamento é válida
 func (c *Client) IsValidRedirectURI(redirectURI string) bool {
 	return slices.Contains(c.RedirectURIs, redirectURI)
 }
 
-// IsValidGrantType verifica se o tipo de grant é válido
 func (c *Client) IsValidGrantType(grantType string) bool {
 	return slices.Contains(c.GrantTypes, grantType)
 }
 
-// IsValidScope verifica se o escopo é válido
 func (c *Client) IsValidScope(scope string) bool {
 	return slices.Contains(c.Scopes, scope)
 }
 
-// HasScope verifica se o cliente tem um escopo específico
 func (c *Client) HasScope(scope string) bool {
 	return c.IsValidScope(scope)
 }
 
-// GetValidGrantTypes retorna os tipos de grant válidos
 func (c *Client) GetValidGrantTypes() []string {
 	return c.GrantTypes
 }
 
-// GetValidRedirectURIs retorna as URIs de redirecionamento válidas
 func (c *Client) GetValidRedirectURIs() []string {
 	return c.RedirectURIs
 }
