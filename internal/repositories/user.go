@@ -2,9 +2,11 @@ package repositories
 
 import (
 	"context"
+	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -25,6 +27,11 @@ func NewUserRepository(db *mongo.Database) UserRepository {
 }
 
 func (u *userRepository) Create(ctx context.Context, user *models.User) error {
+	if user.ID.IsZero() {
+		user.ID = primitive.NewObjectID()
+	}
+
+	user.CreatedAt = time.Now()
 	_, err := u.collection.InsertOne(ctx, user)
 	if err != nil {
 		return err

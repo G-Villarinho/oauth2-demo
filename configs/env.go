@@ -18,6 +18,7 @@ type Environment struct {
 	SMTP      SMTP
 	URLs      URLs
 	Key       Key
+	OTP       OTP
 }
 
 type Server struct {
