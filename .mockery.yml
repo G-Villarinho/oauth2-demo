@@ -1,0 +1,19 @@
+with-expecter: True
+disable-version-string: True
+filename: "{{ .InterfaceName | snakecase }}_mock.go"
+mockname: "{{ .InterfaceName }}Mock"
+dir: "mocks"
+outpkg: "mocks"
+packages:
+  github.com/aetheris-lab/aetheris-id/api/internal/services:
+    config:
+      all: True
+      recursive: True
+  github.com/aetheris-lab/aetheris-id/api/internal/repositories:
+    config:
+      all: True
+      recursive: True
+  github.com/aetheris-lab/aetheris-id/api/pkg/ecdsa:
+    config:
+      all: True
+      recursive: True

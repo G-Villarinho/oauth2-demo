@@ -49,3 +49,5 @@ backups/
 
 # Arquivos de configuração local
 config.local.*
+
+*.pem

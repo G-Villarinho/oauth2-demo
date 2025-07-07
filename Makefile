@@ -110,3 +110,10 @@ restore:
 	docker cp $(BACKUP_DIR) mongodb:/data/restore
 	docker-compose exec mongodb mongorestore --username admin --password password123 --authenticationDatabase admin /data/restore
 	@echo "✅ Backup restaurado!" 
+
+
+.PHONY: generate-key
+generate-key:  ## Gera as chaves do projeto
+	@echo ${YELLOW}Generating key${WHITE}
+	@openssl ecparam -name prime256v1 -genkey -noout -out ecdsa_private.pem
+	@openssl ec -in ecdsa_private.pem -pubout -out ecdsa_public.pem
