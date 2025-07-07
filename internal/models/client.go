@@ -2,6 +2,8 @@ package models
 
 import (
 	"errors"
+	"fmt"
+	"slices"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -10,6 +12,9 @@ import (
 var (
 	ErrClientNotFound      = errors.New("client not found")
 	ErrClientAlreadyExists = errors.New("client already exists")
+	ErrInvalidRedirectURI  = errors.New("invalid redirect uri")
+	ErrInvalidGrantType    = errors.New("invalid grant type")
+	ErrInvalidScope        = errors.New("invalid scope")
 )
 
 type Client struct {
@@ -28,7 +33,7 @@ type CreateClientPayload struct {
 	Name         string   `json:"name" validate:"required"`
 	Description  string   `json:"description" validate:"required"`
 	RedirectURIs []string `json:"redirect_uris" validate:"required"`
-	Scopes       []string `json:"scopes" validate:"required"`
+	GrantTypes   []string `json:"grant_types" validate:"required"`
 }
 
 type ClientResponse struct {
@@ -39,4 +44,48 @@ type ClientResponse struct {
 	RedirectURIs []string           `bson:"redirect_uris" json:"redirect_uris"`
 	Scopes       []string           `bson:"scopes" json:"scopes"`
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
+}
+
+func (c *Client) ToClientResponse() *ClientResponse {
+	return &ClientResponse{
+		ID:           c.ID,
+		ClientID:     c.ClientID,
+		Name:         c.Name,
+		Description:  c.Description,
+		RedirectURIs: c.RedirectURIs,
+		Scopes:       c.Scopes,
+		CreatedAt:    c.CreatedAt,
+	}
+}
+
+func (c *Client) IsValidRedirectURI(redirectURI string) bool {
+	return slices.Contains(c.RedirectURIs, redirectURI)
+}
+
+func (c *Client) IsValidGrantType(grantType string) bool {
+	return slices.Contains(c.GrantTypes, grantType)
+}
+
+func (c *Client) IsValidScope(scope string) bool {
+	return slices.Contains(c.Scopes, scope)
+}
+
+func (c *Client) ValidateRequestParameters(redirectURI string, grantTypes []string, scopes []string) error {
+	if !c.IsValidRedirectURI(redirectURI) {
+		return fmt.Errorf("%w: %s", ErrInvalidRedirectURI, redirectURI)
+	}
+
+	for _, grantType := range grantTypes {
+		if !c.IsValidGrantType(grantType) {
+			return fmt.Errorf("%w: %s", ErrInvalidGrantType, grantType)
+		}
+	}
+
+	for _, scope := range scopes {
+		if !c.IsValidScope(scope) {
+			return fmt.Errorf("%w: %s", ErrInvalidScope, scope)
+		}
+	}
+
+	return nil
 }

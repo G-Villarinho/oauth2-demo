@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/scopes"
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 )
 
 type ClientService interface {
-	CreateClient(ctx context.Context, name string, description string, redirectURIs []string) (*models.ClientResponse, error)
-	ValidateClient(ctx context.Context, clientID string, redirectURI string) (*models.Client, error)
+	CreateClient(ctx context.Context, name string, description string, redirectURIs []string, grantTypes []string) (*models.ClientResponse, error)
+	ValidateClient(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string) (*models.Client, error)
 }
 
 type clientService struct {
@@ -24,7 +25,7 @@ func NewClientService(clientRepo repositories.ClientRepository) ClientService {
 	}
 }
 
-func (s *clientService) CreateClient(ctx context.Context, name string, description string, redirectURIs []string) (*models.ClientResponse, error) {
+func (s *clientService) CreateClient(ctx context.Context, name string, description string, redirectURIs []string, grantTypes []string) (*models.ClientResponse, error) {
 	clientId := s.generateClientID(name)
 
 	clientFromClientID, err := s.clientRepo.GetByClientID(ctx, clientId)
@@ -41,25 +42,32 @@ func (s *clientService) CreateClient(ctx context.Context, name string, descripti
 		Description:  description,
 		RedirectURIs: redirectURIs,
 		ClientID:     clientId,
+		Scopes:       scopes.GetDefaultFirstPartyScopes(),
+		GrantTypes:   grantTypes,
 	}
 
 	if err := s.clientRepo.Create(ctx, client); err != nil {
 		return nil, fmt.Errorf("create client: %w", err)
 	}
 
-	return &models.ClientResponse{
-		ID:           client.ID,
-		ClientID:     client.ClientID,
-		Name:         client.Name,
-		Description:  client.Description,
-		RedirectURIs: client.RedirectURIs,
-		CreatedAt:    client.CreatedAt,
-	}, nil
+	return client.ToClientResponse(), nil
 }
 
-// ValidateClient implements ClientService.
-func (s *clientService) ValidateClient(ctx context.Context, clientID string, redirectURI string) (*models.Client, error) {
-	panic("unimplemented")
+func (s *clientService) ValidateClient(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string) (*models.Client, error) {
+	client, err := s.clientRepo.GetByClientID(ctx, clientID)
+	if err != nil {
+		return nil, fmt.Errorf("get client by client_id: %w", err)
+	}
+
+	if client == nil {
+		return nil, fmt.Errorf("validate client: %w", models.ErrClientNotFound)
+	}
+
+	if err := client.ValidateRequestParameters(redirectURI, grantTypes, scopes); err != nil {
+		return nil, fmt.Errorf("validate request parameters: %w", err)
+	}
+
+	return client, nil
 }
 
 func (s *clientService) generateClientID(name string) string {
