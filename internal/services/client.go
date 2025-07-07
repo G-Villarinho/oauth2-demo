@@ -63,7 +63,7 @@ func (s *clientService) ValidateClient(ctx context.Context, clientID string, red
 		return nil, fmt.Errorf("validate client: %w", models.ErrClientNotFound)
 	}
 
-	if err := client.ValidateRequestParameters(redirectURI, grantTypes, scopes); err != nil {
+	if err := s.AllowsRequest(client, redirectURI, grantTypes, scopes); err != nil {
 		return nil, fmt.Errorf("validate request parameters: %w", err)
 	}
 
@@ -83,4 +83,24 @@ func (s *clientService) generateClientID(name string) string {
 	}
 
 	return cleanID.String() + "@aetheris-lab-connect"
+}
+
+func (s *clientService) AllowsRequest(client *models.Client, redirectURI string, grantTypes []string, scopes []string) error {
+	if !client.IsValidRedirectURI(redirectURI) {
+		return fmt.Errorf("%w: %s", models.ErrInvalidRedirectURI, redirectURI)
+	}
+
+	for _, grantType := range grantTypes {
+		if !client.IsValidGrantType(grantType) {
+			return fmt.Errorf("%w: %s", models.ErrInvalidGrantType, grantType)
+		}
+	}
+
+	for _, scope := range scopes {
+		if !client.IsValidScope(scope) {
+			return fmt.Errorf("%w: %s", models.ErrInvalidScope, scope)
+		}
+	}
+
+	return nil
 }

@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"time"
 
@@ -68,24 +67,4 @@ func (c *Client) IsValidGrantType(grantType string) bool {
 
 func (c *Client) IsValidScope(scope string) bool {
 	return slices.Contains(c.Scopes, scope)
-}
-
-func (c *Client) ValidateRequestParameters(redirectURI string, grantTypes []string, scopes []string) error {
-	if !c.IsValidRedirectURI(redirectURI) {
-		return fmt.Errorf("%w: %s", ErrInvalidRedirectURI, redirectURI)
-	}
-
-	for _, grantType := range grantTypes {
-		if !c.IsValidGrantType(grantType) {
-			return fmt.Errorf("%w: %s", ErrInvalidGrantType, grantType)
-		}
-	}
-
-	for _, scope := range scopes {
-		if !c.IsValidScope(scope) {
-			return fmt.Errorf("%w: %s", ErrInvalidScope, scope)
-		}
-	}
-
-	return nil
 }
