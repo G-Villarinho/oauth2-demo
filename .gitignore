@@ -1,0 +1,51 @@
+# Binários Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Arquivos de teste
+*.test
+*.out
+
+# Arquivos de cobertura
+*.cover
+
+# Dependências Go
+vendor/
+
+# Arquivos de build
+bin/
+dist/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Backups do MongoDB (mencionados no Makefile)
+backups/
+
+# Arquivos de configuração local
+config.local.*
