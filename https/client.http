@@ -1,0 +1,109 @@
+### Aetheris ID - API de Clientes
+
+# Configuração base
+@baseUrl = http://localhost:5001
+@apiVersion = v1
+@contentType = application/json
+
+### 1. Criar Cliente - Exemplo Básico
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "Meu Aplicativo Web",
+    "description": "Aplicação web para autenticação de usuários",
+    "redirect_uris": [
+        "http://localhost:3000/callback",
+        "https://meuapp.com/auth/callback"
+    ],
+    "grant_types": [
+        "authorization_code",
+        "refresh_token"
+    ]
+}
+
+### 2. Criar Cliente - Aplicação Mobile
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "App Mobile",
+    "description": "Aplicativo móvel para iOS e Android",
+    "redirect_uris": [
+        "com.meuapp://oauth/callback",
+        "meuapp://auth/callback"
+    ],
+    "grant_types": [
+        "authorization_code"
+    ]
+}
+
+### 3. Criar Cliente - SPA (Single Page Application)
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "SPA Dashboard",
+    "description": "Dashboard administrativo em React/Vue",
+    "redirect_uris": [
+        "http://localhost:5173/callback",
+        "https://dashboard.meuapp.com/callback"
+    ],
+    "grant_types": [
+        "authorization_code",
+        "refresh_token"
+    ]
+}
+
+### 4. Criar Cliente - Serviço Backend
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "API Service",
+    "description": "Serviço backend para integração com APIs",
+    "redirect_uris": [
+        "https://api.meuapp.com/oauth/callback"
+    ],
+    "grant_types": [
+        "authorization_code"
+    ]
+}
+
+### 5. Exemplo com Erro - URI Inválida
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "Cliente com Erro",
+    "description": "Este cliente tem uma URI inválida",
+    "redirect_uris": [
+        "invalid-uri"
+    ],
+    "grant_types": [
+        "authorization_code"
+    ]
+}
+
+### 6. Exemplo com Erro - Grant Type Inválido
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "Cliente com Grant Type Inválido",
+    "description": "Este cliente tem um grant type não suportado",
+    "redirect_uris": [
+        "http://localhost:3000/callback"
+    ],
+    "grant_types": [
+        "password"
+    ]
+}
+
+### 7. Exemplo com Erro - Campos Obrigatórios Faltando
+POST {{baseUrl}}/api/{{apiVersion}}/clients
+Content-Type: {{contentType}}
+
+{
+    "name": "Cliente Incompleto"
+}

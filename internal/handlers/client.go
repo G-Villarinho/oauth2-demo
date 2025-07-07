@@ -40,7 +40,7 @@ func (h *clientHandler) CreateClient(ectx echo.Context) error {
 
 	if err := ectx.Validate(&payload); err != nil {
 		logger.Error("validate payload", "error", err)
-		return echo.ErrBadRequest
+		return err
 	}
 
 	response, err := h.clientService.CreateClient(ectx.Request().Context(), payload.Name, payload.Description, payload.RedirectURIs, payload.GrantTypes)

@@ -1,32 +1,30 @@
-package api
+package bootstrap
 
 import (
 	"github.com/aetheris-lab/aetheris-id/api/internal/handlers"
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
+	"github.com/aetheris-lab/aetheris-id/api/internal/server"
 	"github.com/aetheris-lab/aetheris-id/api/internal/services"
 	"github.com/aetheris-lab/aetheris-id/api/pkg/injector"
 	"go.uber.org/dig"
 )
 
-func InitializeInternalDependencies(container *dig.Container) {
-	provideHandlers(container)
-	provideServices(container)
-	provideRepositories(container)
-}
-
-func provideHandlers(container *dig.Container) {
+func BuildContainer(container *dig.Container) {
+	// Handlers
 	injector.Provide(container, handlers.NewClientHandler)
-}
 
-func provideServices(container *dig.Container) {
+	// Services
 	injector.Provide(container, services.NewAuthService)
 	injector.Provide(container, services.NewClientService)
 	injector.Provide(container, services.NewJWTService)
 	injector.Provide(container, services.NewOTPService)
-}
 
-func provideRepositories(container *dig.Container) {
+	// Repositories
 	injector.Provide(container, repositories.NewClientRepository)
 	injector.Provide(container, repositories.NewOTPRepository)
 	injector.Provide(container, repositories.NewUserRepository)
+
+	// Server
+	injector.Provide(container, server.NewServer)
+
 }
