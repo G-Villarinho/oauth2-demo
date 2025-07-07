@@ -1,22 +1,27 @@
 package models
 
 import (
-	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var (
-	ErrOTPNotFound = errors.New("otp not found")
-	ErrInvalidCode = errors.New("invalid code")
-	ErrOTPExpired  = errors.New("otp expired")
-)
+// CreateOTPPayload representa o payload para criação de OTP
+type CreateOTPPayload struct {
+	UserID    primitive.ObjectID `json:"user_id" validate:"required"`
+	Code      string             `json:"code" validate:"required"`
+	ExpiresAt time.Time          `json:"expires_at" validate:"required"`
+}
 
-type OTP struct {
-	ID        primitive.ObjectID `json:"id" bson:"_id"`
-	UserID    primitive.ObjectID `json:"user_id" bson:"user_id"`
-	Code      string             `json:"code" bson:"code"`
-	ExpiresAt time.Time          `json:"expires_at" bson:"expires_at"`
-	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+// ValidateOTPPayload representa o payload para validação de OTP
+type ValidateOTPPayload struct {
+	Code string `json:"code" validate:"required"`
+}
+
+// OTPResponse representa a resposta da API para OTP
+type OTPResponse struct {
+	ID        primitive.ObjectID `json:"id"`
+	UserID    primitive.ObjectID `json:"user_id"`
+	ExpiresAt time.Time          `json:"expires_at"`
+	CreatedAt time.Time          `json:"created_at"`
 }

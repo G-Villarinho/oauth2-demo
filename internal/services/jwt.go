@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aetheris-lab/aetheris-id/api/internal/models"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"github.com/aetheris-lab/aetheris-id/api/pkg/ecdsa"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -31,7 +31,7 @@ func (s *jwtService) GenerateOTPTokenJWT(ctx context.Context, jti string, expire
 		return "", fmt.Errorf("parse ecdsa private key: %w", err)
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, models.OTPTokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, entities.OTPTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "aetheris-id",
 			ID:        jti,
@@ -56,7 +56,7 @@ func (s *jwtService) GenerateAccessTokenJWT(ctx context.Context, firstName, last
 		return "", fmt.Errorf("parse ecdsa private key: %w", err)
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, models.AccessTokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, entities.AccessTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "aetheris-id",
 			ID:        userID,

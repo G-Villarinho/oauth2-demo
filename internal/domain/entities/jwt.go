@@ -1,4 +1,4 @@
-package models
+package entities
 
 import "github.com/golang-jwt/jwt/v5"
 
@@ -11,4 +11,9 @@ type AccessTokenClaims struct {
 	FirstName string
 	LastName  string
 	Email     string
+}
+
+// GetFullName retorna o nome completo do usuário do token
+func (a *AccessTokenClaims) GetFullName() string {
+	return a.FirstName + " " + a.LastName
 }

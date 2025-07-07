@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/configs"
-	"github.com/aetheris-lab/aetheris-id/api/internal/models"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -18,8 +18,8 @@ const (
 )
 
 type OTPService interface {
-	CreateOTP(ctx context.Context, userID string) (*models.OTP, error)
-	ValidateCode(ctx context.Context, code, otpID string) (*models.OTP, error)
+	CreateOTP(ctx context.Context, userID string) (*entities.OTP, error)
+	ValidateCode(ctx context.Context, code, otpID string) (*entities.OTP, error)
 }
 
 type otpService struct {
@@ -34,13 +34,13 @@ func NewOTPService(otpRepo repositories.OTPRepository, config configs.Environmen
 	}
 }
 
-func (s *otpService) CreateOTP(ctx context.Context, userID string) (*models.OTP, error) {
+func (s *otpService) CreateOTP(ctx context.Context, userID string) (*entities.OTP, error) {
 	userIDObj, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, fmt.Errorf("convert userID to ObjectID: %w", err)
 	}
 
-	otp := &models.OTP{
+	otp := &entities.OTP{
 		UserID:    userIDObj,
 		Code:      s.generateOTP(),
 		ExpiresAt: time.Now().UTC().Add(s.config.OTP.ExpirationMinutes),
@@ -53,18 +53,14 @@ func (s *otpService) CreateOTP(ctx context.Context, userID string) (*models.OTP,
 	return otp, nil
 }
 
-func (s *otpService) ValidateCode(ctx context.Context, code, otpID string) (*models.OTP, error) {
+func (s *otpService) ValidateCode(ctx context.Context, code, otpID string) (*entities.OTP, error) {
 	otp, err := s.otpRepo.FindByID(ctx, otpID)
 	if err != nil {
 		return nil, err
 	}
 
-	if otp.Code != code {
-		return nil, models.ErrInvalidCode
-	}
-
-	if time.Now().After(otp.ExpiresAt) {
-		return nil, models.ErrOTPExpired
+	if err := otp.ValidateCode(code); err != nil {
+		return nil, err
 	}
 
 	if err := s.otpRepo.Delete(ctx, otpID); err != nil {

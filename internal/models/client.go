@@ -1,33 +1,12 @@
 package models
 
 import (
-	"errors"
-	"slices"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var (
-	ErrClientNotFound      = errors.New("client not found")
-	ErrClientAlreadyExists = errors.New("client already exists")
-	ErrInvalidRedirectURI  = errors.New("invalid redirect uri")
-	ErrInvalidGrantType    = errors.New("invalid grant type")
-	ErrInvalidScope        = errors.New("invalid scope")
-)
-
-type Client struct {
-	ID           primitive.ObjectID `json:"id" bson:"_id"`
-	ClientID     string             `json:"client_id" bson:"client_id"`
-	Name         string             `bson:"name" json:"name"`
-	Description  string             `bson:"description" json:"description"`
-	GrantTypes   []string           `bson:"grant_types" json:"grant_types"`
-	RedirectURIs []string           `bson:"redirect_uris" json:"redirect_uris"`
-	Scopes       []string           `bson:"scopes" json:"scopes"`
-	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
-	UpdatedAt    *time.Time         `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
-}
-
+// CreateClientPayload representa o payload para criação de cliente
 type CreateClientPayload struct {
 	Name         string   `json:"name" validate:"required"`
 	Description  string   `json:"description" validate:"required"`
@@ -35,36 +14,28 @@ type CreateClientPayload struct {
 	GrantTypes   []string `json:"grant_types" validate:"required,min=1,dive,oneof=authorization_code refresh_token"`
 }
 
+// UpdateClientPayload representa o payload para atualização de cliente
+type UpdateClientPayload struct {
+	Name         *string  `json:"name,omitempty" validate:"omitempty,min=1"`
+	Description  *string  `json:"description,omitempty" validate:"omitempty,min=1"`
+	RedirectURIs []string `json:"redirect_uris,omitempty" validate:"omitempty,min=1,dive,uri"`
+	GrantTypes   []string `json:"grant_types,omitempty" validate:"omitempty,min=1,dive,oneof=authorization_code refresh_token"`
+	Scopes       []string `json:"scopes,omitempty" validate:"omitempty,min=1"`
+}
+
+// ClientResponse representa a resposta da API para cliente
 type ClientResponse struct {
-	ID           primitive.ObjectID `json:"id" bson:"_id"`
-	ClientID     string             `json:"client_id" bson:"client_id"`
-	Name         string             `bson:"name" json:"name"`
-	Description  string             `bson:"description" json:"description"`
-	RedirectURIs []string           `bson:"redirect_uris" json:"redirect_uris"`
-	Scopes       []string           `bson:"scopes" json:"scopes"`
-	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
+	ID           primitive.ObjectID `json:"id"`
+	ClientID     string             `json:"client_id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	RedirectURIs []string           `json:"redirect_uris"`
+	Scopes       []string           `json:"scopes"`
+	CreatedAt    time.Time          `json:"created_at"`
 }
 
-func (c *Client) ToClientResponse() *ClientResponse {
-	return &ClientResponse{
-		ID:           c.ID,
-		ClientID:     c.ClientID,
-		Name:         c.Name,
-		Description:  c.Description,
-		RedirectURIs: c.RedirectURIs,
-		Scopes:       c.Scopes,
-		CreatedAt:    c.CreatedAt,
-	}
-}
-
-func (c *Client) IsValidRedirectURI(redirectURI string) bool {
-	return slices.Contains(c.RedirectURIs, redirectURI)
-}
-
-func (c *Client) IsValidGrantType(grantType string) bool {
-	return slices.Contains(c.GrantTypes, grantType)
-}
-
-func (c *Client) IsValidScope(scope string) bool {
-	return slices.Contains(c.Scopes, scope)
+// ClientListResponse representa a resposta da API para listagem de clientes
+type ClientListResponse struct {
+	Clients []ClientResponse `json:"clients"`
+	Total   int64            `json:"total"`
 }

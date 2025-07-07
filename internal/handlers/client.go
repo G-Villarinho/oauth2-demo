@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
 	"github.com/aetheris-lab/aetheris-id/api/internal/services"
 	"github.com/labstack/echo/v4"
@@ -44,7 +45,7 @@ func (h *clientHandler) CreateClient(ectx echo.Context) error {
 
 	response, err := h.clientService.CreateClient(ectx.Request().Context(), payload.Name, payload.Description, payload.RedirectURIs, payload.GrantTypes)
 	if err != nil {
-		if errors.Is(err, models.ErrClientAlreadyExists) {
+		if errors.Is(err, entities.ErrClientAlreadyExists) {
 			logger.Error(err.Error())
 			return echo.ErrConflict
 		}

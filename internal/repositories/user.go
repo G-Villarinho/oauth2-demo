@@ -4,16 +4,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/aetheris-lab/aetheris-id/api/internal/models"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user *models.User) error
-	FindByEmail(ctx context.Context, email string) (*models.User, error)
-	FindByID(ctx context.Context, id string) (*models.User, error)
+	Create(ctx context.Context, user *entities.User) error
+	FindByEmail(ctx context.Context, email string) (*entities.User, error)
+	FindByID(ctx context.Context, id string) (*entities.User, error)
 }
 
 type userRepository struct {
@@ -26,7 +26,7 @@ func NewUserRepository(db *mongo.Database) UserRepository {
 	}
 }
 
-func (u *userRepository) Create(ctx context.Context, user *models.User) error {
+func (u *userRepository) Create(ctx context.Context, user *entities.User) error {
 	if user.ID.IsZero() {
 		user.ID = primitive.NewObjectID()
 	}
@@ -40,14 +40,14 @@ func (u *userRepository) Create(ctx context.Context, user *models.User) error {
 	return nil
 }
 
-func (u *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
-	var user models.User
+func (u *userRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
+	var user entities.User
 
 	filter := bson.M{"email": email}
 	err := u.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, models.ErrUserNotFound
+			return nil, entities.ErrUserNotFound
 		}
 
 		return nil, err
@@ -56,8 +56,8 @@ func (u *userRepository) FindByEmail(ctx context.Context, email string) (*models
 	return &user, nil
 }
 
-func (u *userRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
-	var user models.User
+func (u *userRepository) FindByID(ctx context.Context, id string) (*entities.User, error) {
+	var user entities.User
 
 	filter := bson.M{"_id": id}
 	err := u.collection.FindOne(ctx, filter).Decode(&user)
