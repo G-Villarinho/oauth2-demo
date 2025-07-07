@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -78,7 +79,7 @@ func TestOTP_ValidateCode(t *testing.T) {
 
 		// Assert
 		require.Error(t, err)
-		assert.Equal(t, ErrInvalidCode, err)
+		assert.Equal(t, domain.ErrInvalidCode, err)
 	})
 
 	t.Run("should return error when OTP is expired", func(t *testing.T) {
@@ -96,6 +97,6 @@ func TestOTP_ValidateCode(t *testing.T) {
 
 		// Assert
 		require.Error(t, err)
-		assert.Equal(t, ErrOTPExpired, err)
+		assert.Equal(t, domain.ErrOTPExpired, err)
 	})
 }

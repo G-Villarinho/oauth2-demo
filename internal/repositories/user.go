@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -47,7 +48,7 @@ func (u *userRepository) FindByEmail(ctx context.Context, email string) (*entiti
 	err := u.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, entities.ErrUserNotFound
+			return nil, domain.ErrUserNotFound
 		}
 
 		return nil, err

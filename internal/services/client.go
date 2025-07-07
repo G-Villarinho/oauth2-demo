@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/scopes"
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
@@ -14,7 +15,7 @@ import (
 
 type ClientService interface {
 	CreateClient(ctx context.Context, name string, description string, redirectURIs []string, grantTypes []string) (*models.ClientResponse, error)
-	ValidateClient(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string) (*entities.Client, error)
+	GetClientByClientID(ctx context.Context, clientID string) (*entities.Client, error)
 }
 
 type clientService struct {
@@ -31,12 +32,12 @@ func (s *clientService) CreateClient(ctx context.Context, name string, descripti
 	clientId := s.generateClientID(name)
 
 	clientFromClientID, err := s.clientRepo.GetByClientID(ctx, clientId)
-	if err != nil && !errors.Is(err, entities.ErrClientNotFound) {
+	if err != nil && !errors.Is(err, domain.ErrClientNotFound) {
 		return nil, fmt.Errorf("get client by client_id: %w", err)
 	}
 
 	if clientFromClientID != nil {
-		return nil, fmt.Errorf("create client: %w", entities.ErrClientAlreadyExists)
+		return nil, fmt.Errorf("create client: %w", domain.ErrClientAlreadyExists)
 	}
 
 	client := &entities.Client{
@@ -55,18 +56,10 @@ func (s *clientService) CreateClient(ctx context.Context, name string, descripti
 	return models.ClientToResponse(client), nil
 }
 
-func (s *clientService) ValidateClient(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string) (*entities.Client, error) {
+func (s *clientService) GetClientByClientID(ctx context.Context, clientID string) (*entities.Client, error) {
 	client, err := s.clientRepo.GetByClientID(ctx, clientID)
 	if err != nil {
 		return nil, fmt.Errorf("get client by client_id: %w", err)
-	}
-
-	if client == nil {
-		return nil, fmt.Errorf("validate client: %w", entities.ErrClientNotFound)
-	}
-
-	if err := s.AllowsRequest(client, redirectURI, grantTypes, scopes); err != nil {
-		return nil, fmt.Errorf("validate request parameters: %w", err)
 	}
 
 	return client, nil
@@ -85,24 +78,4 @@ func (s *clientService) generateClientID(name string) string {
 	}
 
 	return cleanID.String() + "@aetheris-lab-connect"
-}
-
-func (s *clientService) AllowsRequest(client *entities.Client, redirectURI string, grantTypes []string, scopes []string) error {
-	if !client.IsValidRedirectURI(redirectURI) {
-		return fmt.Errorf("%w: %s", entities.ErrInvalidRedirectURI, redirectURI)
-	}
-
-	for _, grantType := range grantTypes {
-		if !client.IsValidGrantType(grantType) {
-			return fmt.Errorf("%w: %s", entities.ErrInvalidGrantType, grantType)
-		}
-	}
-
-	for _, scope := range scopes {
-		if !client.IsValidScope(scope) {
-			return fmt.Errorf("%w: %s", entities.ErrInvalidScope, scope)
-		}
-	}
-
-	return nil
 }

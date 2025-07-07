@@ -56,11 +56,11 @@ func (s *otpService) CreateOTP(ctx context.Context, userID string) (*entities.OT
 func (s *otpService) ValidateCode(ctx context.Context, code, otpID string) (*entities.OTP, error) {
 	otp, err := s.otpRepo.FindByID(ctx, otpID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find otp by id: %w", err)
 	}
 
 	if err := otp.ValidateCode(code); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("validate code: %w", err)
 	}
 
 	if err := s.otpRepo.Delete(ctx, otpID); err != nil {

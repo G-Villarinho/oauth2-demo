@@ -1,19 +1,12 @@
 package entities
 
 import (
-	"errors"
+	"fmt"
 	"slices"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-var (
-	ErrClientNotFound      = errors.New("client not found")
-	ErrClientAlreadyExists = errors.New("client already exists")
-	ErrInvalidRedirectURI  = errors.New("invalid redirect uri")
-	ErrInvalidGrantType    = errors.New("invalid grant type")
-	ErrInvalidScope        = errors.New("invalid scope")
 )
 
 type Client struct {
@@ -50,4 +43,52 @@ func (c *Client) GetValidGrantTypes() []string {
 
 func (c *Client) GetValidRedirectURIs() []string {
 	return c.RedirectURIs
+}
+
+func (c *Client) ValidateRedirectURI(redirectURI string) error {
+	if !c.IsValidRedirectURI(redirectURI) {
+		return fmt.Errorf("%w: %s", domain.ErrInvalidRedirectURI, redirectURI)
+	}
+	return nil
+}
+
+func (c *Client) ValidateResponseType(responseType string) error {
+	switch responseType {
+	case "code":
+		if !c.IsValidGrantType("authorization_code") {
+			return fmt.Errorf("%w: client does not support authorization_code grant type", domain.ErrInvalidGrantType)
+		}
+	case "token":
+		if !c.IsValidGrantType("implicit") {
+			return fmt.Errorf("%w: client does not support implicit grant type", domain.ErrInvalidGrantType)
+		}
+	default:
+		return fmt.Errorf("%w: %s", domain.ErrInvalidResponseType, responseType)
+	}
+	return nil
+}
+
+func (c *Client) ValidateScopes(scopes []string) error {
+	for _, scope := range scopes {
+		if !c.IsValidScope(scope) {
+			return fmt.Errorf("%w: %s", domain.ErrInvalidScope, scope)
+		}
+	}
+	return nil
+}
+
+func (c *Client) ValidateRequest(redirectURI string, responseType string, scopes []string) error {
+	if err := c.ValidateRedirectURI(redirectURI); err != nil {
+		return err
+	}
+
+	if err := c.ValidateResponseType(responseType); err != nil {
+		return err
+	}
+
+	if err := c.ValidateScopes(scopes); err != nil {
+		return err
+	}
+
+	return nil
 }

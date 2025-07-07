@@ -1,15 +1,9 @@
 package entities
 
 import (
-	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
 )
 
 type User struct {

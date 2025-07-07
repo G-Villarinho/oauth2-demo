@@ -1,16 +1,10 @@
 package entities
 
 import (
-	"errors"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-var (
-	ErrOTPNotFound = errors.New("otp not found")
-	ErrInvalidCode = errors.New("invalid code")
-	ErrOTPExpired  = errors.New("otp expired")
 )
 
 type OTP struct {
@@ -31,11 +25,11 @@ func (o *OTP) IsValid() bool {
 
 func (o *OTP) ValidateCode(code string) error {
 	if o.IsExpired() {
-		return ErrOTPExpired
+		return domain.ErrOTPExpired
 	}
 
 	if o.Code != code {
-		return ErrInvalidCode
+		return domain.ErrInvalidCode
 	}
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -45,7 +46,7 @@ func (r *clientRepository) GetByClientID(ctx context.Context, clientID string) (
 	var client entities.Client
 	if err := r.collection.FindOne(ctx, bson.M{"client_id": clientID}).Decode(&client); err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, entities.ErrClientNotFound
+			return nil, domain.ErrClientNotFound
 		}
 
 		return nil, err

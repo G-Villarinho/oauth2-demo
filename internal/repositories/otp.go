@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -47,7 +48,7 @@ func (r *otpRepository) FindByID(ctx context.Context, id string) (*entities.OTP,
 	err := r.collection.FindOne(ctx, filter).Decode(&otp)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, entities.ErrOTPNotFound
+			return nil, domain.ErrOTPNotFound
 		}
 
 		return nil, err

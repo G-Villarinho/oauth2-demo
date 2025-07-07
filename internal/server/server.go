@@ -7,6 +7,7 @@ import (
 	"github.com/aetheris-lab/aetheris-id/api/configs"
 	"github.com/aetheris-lab/aetheris-id/api/internal/api"
 	"github.com/aetheris-lab/aetheris-id/api/internal/handlers"
+	"github.com/aetheris-lab/aetheris-id/api/internal/middlewares"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/time/rate"
@@ -17,7 +18,7 @@ type Server struct {
 	port string
 }
 
-func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler) *Server {
+func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, authMiddleware middlewares.AuthMiddleware) *Server {
 	e := echo.New()
 	s := &Server{
 		echo: e,
@@ -27,7 +28,7 @@ func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler
 	s.configureMiddlewares(config)
 	s.configureValidator()
 	s.configureErrorHandler()
-	s.configureRoutes(clientHandler)
+	s.configureRoutes(clientHandler, authHandler, authMiddleware)
 
 	return s
 }
@@ -77,7 +78,7 @@ func (s *Server) configureErrorHandler() {
 	s.echo.HTTPErrorHandler = api.CustomHTTPErrorHandler
 }
 
-func (s *Server) configureRoutes(clientHandler handlers.ClientHandler) {
+func (s *Server) configureRoutes(clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, authMiddleware middlewares.AuthMiddleware) {
 	apiGroup := s.echo.Group("/api/v1")
-	RegisterRoutes(apiGroup, clientHandler)
+	RegisterRoutes(apiGroup, clientHandler, authHandler, authMiddleware)
 }
