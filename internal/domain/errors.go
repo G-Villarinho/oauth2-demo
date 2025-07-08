@@ -29,4 +29,9 @@ var (
 	ErrInvalidResponseType     = errors.New("invalid response type")
 	ErrUnauthorizedClient      = errors.New("unauthorized client")
 	ErrUnauthorizedRedirectURI = errors.New("unauthorized redirect uri")
+
+	// Refresh Token
+	ErrRefreshTokenNotFound = errors.New("refresh token not found")
+	ErrRefreshTokenExpired  = errors.New("refresh token expired")
+	ErrRefreshTokenRevoked  = errors.New("refresh token revoked")
 )

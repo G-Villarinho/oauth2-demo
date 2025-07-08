@@ -20,11 +20,12 @@ type OAuthService interface {
 }
 
 type oauthService struct {
-	clientService   clientService
-	authCodeService authorizationCodeService
-	jwtService      jwtService
-	userRepo        repositories.UserRepository
-	config          *configs.Environment
+	clientService       clientService
+	authCodeService     authorizationCodeService
+	jwtService          jwtService
+	userRepo            repositories.UserRepository
+	refreshTokenService refreshTokenService
+	config              *configs.Environment
 }
 
 func NewOAuthService(
@@ -32,14 +33,16 @@ func NewOAuthService(
 	authCodeService authorizationCodeService,
 	jwtService jwtService,
 	userRepo repositories.UserRepository,
+	refreshTokenService refreshTokenService,
 	config *configs.Environment,
 ) OAuthService {
 	return &oauthService{
-		clientService:   clientService,
-		authCodeService: authCodeService,
-		jwtService:      jwtService,
-		userRepo:        userRepo,
-		config:          config,
+		clientService:       clientService,
+		authCodeService:     authCodeService,
+		jwtService:          jwtService,
+		userRepo:            userRepo,
+		refreshTokenService: refreshTokenService,
+		config:              config,
 	}
 }
 
@@ -107,8 +110,6 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 	}
 
 	hasRefreshToken := client.IsValidGrantType("refresh_token")
-	hasOpenID := scopes.HasScope(authorizationCode.Scopes, "openid")
-
 	accessTokenExpiresAt := time.Now().Add(s.config.Security.AccessTokenExpirationHours)
 	if hasRefreshToken {
 		accessTokenExpiresAt = time.Now().Add(s.config.Security.RefreshTokenExpirationHours)
@@ -119,6 +120,17 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 		return nil, fmt.Errorf("generate access token: %w", err)
 	}
 
+	var refreshTokenHash string
+	if hasRefreshToken {
+		refreshToken, err := s.refreshTokenService.CreateRefreshToken(ctx, authorizationCode.UserID, client.ClientID, authorizationCode.Scopes)
+		if err != nil {
+			return nil, fmt.Errorf("create refresh token: %w", err)
+		}
+
+		refreshTokenHash = refreshToken.TokenHash
+	}
+
+	hasOpenID := scopes.HasScope(authorizationCode.Scopes, "openid")
 	var idToken string
 	if hasOpenID {
 		user, err := s.userRepo.FindByID(ctx, authorizationCode.UserID)
@@ -133,10 +145,11 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 	}
 
 	return &models.TokenResponse{
-		AccessToken: accessToken,
-		IDToken:     idToken,
-		TokenType:   "Bearer",
-		ExpiresIn:   int64(time.Until(accessTokenExpiresAt).Seconds()),
+		AccessToken:  accessToken,
+		IDToken:      idToken,
+		RefreshToken: refreshTokenHash,
+		TokenType:    "Bearer",
+		ExpiresIn:    int64(time.Until(accessTokenExpiresAt).Seconds()),
 	}, nil
 }
 
