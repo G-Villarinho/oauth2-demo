@@ -13,16 +13,22 @@ import (
 func BuildContainer(container *dig.Container) {
 	// Handlers
 	injector.Provide(container, handlers.NewClientHandler)
+	injector.Provide(container, handlers.NewOAuthHandler)
 
 	// Services
 	injector.Provide(container, services.NewAuthService)
+	injector.Provide(container, services.NewAuthorizationCodeService)
 	injector.Provide(container, services.NewClientService)
 	injector.Provide(container, services.NewJWTService)
+	injector.Provide(container, services.NewOAuthService)
 	injector.Provide(container, services.NewOTPService)
+	injector.Provide(container, services.NewRefreshTokenService)
 
 	// Repositories
+	injector.Provide(container, repositories.NewAuthorizationCodeRepository)
 	injector.Provide(container, repositories.NewClientRepository)
 	injector.Provide(container, repositories.NewOTPRepository)
+	injector.Provide(container, repositories.NewRefreshTokenRepository)
 	injector.Provide(container, repositories.NewUserRepository)
 
 	// Server

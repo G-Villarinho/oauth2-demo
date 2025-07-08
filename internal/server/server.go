@@ -18,7 +18,7 @@ type Server struct {
 	port string
 }
 
-func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, authMiddleware middlewares.AuthMiddleware) *Server {
+func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, oauthHandler handlers.OAuthHandler, authMiddleware middlewares.AuthMiddleware) *Server {
 	e := echo.New()
 	s := &Server{
 		echo: e,
@@ -28,7 +28,7 @@ func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler
 	s.configureMiddlewares(config)
 	s.configureValidator()
 	s.configureErrorHandler()
-	s.configureRoutes(clientHandler, authHandler, authMiddleware)
+	s.configureRoutes(clientHandler, authHandler, oauthHandler, authMiddleware)
 
 	return s
 }
@@ -78,7 +78,7 @@ func (s *Server) configureErrorHandler() {
 	s.echo.HTTPErrorHandler = api.CustomHTTPErrorHandler
 }
 
-func (s *Server) configureRoutes(clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, authMiddleware middlewares.AuthMiddleware) {
+func (s *Server) configureRoutes(clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, oauthHandler handlers.OAuthHandler, authMiddleware middlewares.AuthMiddleware) {
 	apiGroup := s.echo.Group("/api/v1")
-	RegisterRoutes(apiGroup, clientHandler, authHandler, authMiddleware)
+	RegisterRoutes(apiGroup, clientHandler, authHandler, oauthHandler, authMiddleware)
 }
