@@ -209,7 +209,7 @@ func (s *oauthService) callbackURL(code, state, redirectURI string) (string, err
 
 func (s *oauthService) validateOAuthParameters(client *entities.Client, input models.AuthorizeInput) error {
 	if !client.IsValidRedirectURI(input.RedirectURI) {
-		return fmt.Errorf("%w: %s", domain.ErrInvalidRedirectURI, input.RedirectURI)
+		return fmt.Errorf("authorize: %w", domain.ErrInvalidRedirectURI)
 	}
 
 	if err := client.ValidateResponseType(input.ResponseType); err != nil {
