@@ -1,119 +1,123 @@
-# Makefile para gerenciar containers Docker do MongoDB
+# Makefile para Aetheris ID API
+# Uso: make <comando>
 
-.PHONY: help up down start stop restart logs status clean clean-all
+.PHONY: help build up down logs test test-e2e test-unit clean docker-clean generate-mocks
 
-# Comando padrão - mostra ajuda
-help:
+# Comandos principais
+help: ## Mostra esta ajuda
 	@echo "Comandos disponíveis:"
-	@echo "  make up      - Subir containers em background"
-	@echo "  make start   - Subir containers em background"
-	@echo "  make down    - Parar e remover containers"
-	@echo "  make stop    - Parar containers"
-	@echo "  make restart - Reiniciar containers"
-	@echo "  make logs    - Ver logs dos containers"
-	@echo "  make status  - Ver status dos containers"
-	@echo "  make clean   - Parar containers e remover volumes"
-	@echo "  make clean-all - Parar containers, remover volumes e imagens"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Subir containers em background
-up:
-	@echo "🚀 Subindo containers MongoDB..."
-	docker-compose up -d
-	@echo "✅ Containers iniciados!"
-	@echo "📊 MongoDB disponível em: localhost:27017"
-	@echo "🌐 MongoDB Express disponível em: http://localhost:8081"
+# Docker Compose
+build: ## Constrói as imagens Docker
+	docker-compose build --no-cache
 
-# Alias para up
-start: up
+up: ## Sobe os serviços (MongoDB + App)
+	docker-compose up -d mongodb app
 
-# Parar e remover containers
-down:
-	@echo "🛑 Parando containers..."
-	docker-compose down
-	@echo "✅ Containers parados e removidos!"
+down: ## Para e remove todos os containers
+	docker-compose down --remove-orphans
 
-# Parar containers (sem remover)
-stop:
-	@echo "⏸️  Parando containers..."
-	docker-compose stop
-	@echo "✅ Containers parados!"
+logs: ## Mostra logs da aplicação
+	docker-compose logs -f app
 
-# Reiniciar containers
-restart:
-	@echo "🔄 Reiniciando containers..."
-	docker-compose restart
-	@echo "✅ Containers reiniciados!"
-
-# Ver logs dos containers
-logs:
-	@echo "📋 Logs dos containers:"
-	docker-compose logs -f
-
-# Ver logs apenas do MongoDB
-logs-mongo:
-	@echo "📋 Logs do MongoDB:"
+logs-mongo: ## Mostra logs do MongoDB
 	docker-compose logs -f mongodb
 
-# Ver logs apenas do MongoDB Express
-logs-express:
-	@echo "📋 Logs do MongoDB Express:"
-	docker-compose logs -f mongo-express
+# Testes
+test: ## Executa todos os testes (unit + e2e)
+	@echo "🧪 Executando todos os testes..."
+	$(MAKE) test-unit
+	$(MAKE) test-e2e
 
-# Ver status dos containers
-status:
-	@echo "📊 Status dos containers:"
+test-unit: ## Executa testes unitários
+	@echo "🧪 Executando testes unitários..."
+	go test -v ./...
+
+test-e2e: ## Executa testes E2E usando o script
+	@echo "🚀 Executando testes E2E via script..."
+	@if [ -f "./scripts/run-e2e-tests.sh" ]; then \
+		chmod +x ./scripts/run-e2e-tests.sh; \
+		./scripts/run-e2e-tests.sh; \
+	else \
+		echo "❌ Script de testes E2E não encontrado: ./scripts/run-e2e-tests.sh"; \
+		echo "💡 Executando testes E2E diretamente..."; \
+		$(MAKE) test-e2e-direct; \
+	fi
+
+test-e2e-direct: ## Executa testes E2E diretamente (sem script)
+	@echo "🚀 Iniciando testes E2E..."
+	@echo "🛑 Parando containers existentes..."
+	docker-compose down --remove-orphans
+	@echo "🔨 Construindo e subindo serviços..."
+	docker-compose up --build -d mongodb app
+	@echo "⏳ Aguardando serviços estarem prontos..."
+	@sleep 10
+	@echo "🧪 Executando testes E2E..."
+	docker-compose run --rm e2e-tests
+	@echo "🛑 Parando serviços..."
+	docker-compose down
+
+test-e2e-quick: ## Executa testes E2E sem rebuild (mais rápido)
+	@echo "🚀 Executando testes E2E (modo rápido)..."
+	docker-compose run --rm e2e-tests
+
+# Desenvolvimento
+dev: ## Sobe ambiente de desenvolvimento
+	@echo "🚀 Iniciando ambiente de desenvolvimento..."
+	docker-compose up --build -d mongodb app
+	@echo "✅ Ambiente pronto! Acesse http://localhost:8080"
+
+dev-logs: ## Mostra logs em modo desenvolvimento
+	docker-compose logs -f
+
+# Limpeza
+clean: ## Limpa arquivos temporários e cache
+	go clean -cache -testcache
+	find . -name "*.tmp" -delete
+	find . -name "*.log" -delete
+
+docker-clean: ## Limpa containers, volumes e imagens não utilizados
+	@echo "🧹 Limpando Docker..."
+	docker system prune -f
+	docker volume prune -f
+	docker image prune -f
+
+# Geração de código
+generate-mocks: ## Gera mocks para interfaces
+	@echo "🔧 Gerando mocks..."
+	mockery --dir=services --name=AuthService --output=mocks
+	mockery --dir=services --name=OTPService --output=mocks
+	mockery --dir=services --name=JWTService --output=mocks
+	mockery --dir=repositories --name=UserRepository --output=mocks
+	mockery --dir=repositories --name=OTPRepository --output=mocks
+	mockery --dir=middlewares --name=CookieMiddleware --output=mocks
+	@echo "✅ Mocks gerados!"
+
+# Verificações
+check: ## Executa verificações de código
+	@echo "🔍 Executando verificações..."
+	go vet ./...
+	gofmt -d .
+	golint ./... || true
+
+# Produção
+prod-build: ## Constrói para produção
+	@echo "🏗️ Construindo para produção..."
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/api ./cmd/api
+
+# Utilitários
+status: ## Mostra status dos containers
 	docker-compose ps
 
-# Limpar containers e volumes (cuidado - apaga dados)
-clean:
-	@echo "🧹 Limpando containers e volumes..."
-	docker-compose down -v
-	@echo "✅ Containers e volumes removidos!"
+restart: ## Reinicia a aplicação
+	docker-compose restart app
 
-# Limpeza completa (containers, volumes e imagens)
-clean-all:
-	@echo "🧹 Limpeza completa..."
-	docker-compose down -v --rmi all
-	@echo "✅ Tudo removido!"
+shell: ## Abre shell no container da aplicação
+	docker-compose exec app sh
 
-# Verificar se containers estão rodando
-check:
-	@echo "🔍 Verificando status dos containers..."
-	@if docker-compose ps | grep -q "Up"; then \
-		echo "✅ Containers estão rodando!"; \
-		echo "📊 MongoDB: localhost:27017"; \
-		echo "🌐 MongoDB Express: http://localhost:8081"; \
-	else \
-		echo "❌ Containers não estão rodando. Execute 'make up' para iniciar."; \
-	fi
+mongo-shell: ## Abre shell no MongoDB
+	docker-compose exec mongodb mongosh
 
-# Conectar ao MongoDB via shell
-shell:
-	@echo "🐚 Conectando ao MongoDB shell..."
-	docker-compose exec mongodb mongosh -u admin -p password123
-
-# Backup do banco
-backup:
-	@echo "💾 Criando backup do MongoDB..."
-	mkdir -p backups
-	docker-compose exec mongodb mongodump --username admin --password password123 --authenticationDatabase admin --db aetheris --out /data/backup
-	docker cp mongodb:/data/backup ./backups/$(shell date +%Y%m%d_%H%M%S)
-	@echo "✅ Backup criado em ./backups/"
-
-# Restaurar backup
-restore:
-	@echo "📥 Restaurando backup do MongoDB..."
-	@if [ -z "$(BACKUP_DIR)" ]; then \
-		echo "❌ Especifique o diretório do backup: make restore BACKUP_DIR=./backups/20231201_120000"; \
-		exit 1; \
-	fi
-	docker cp $(BACKUP_DIR) mongodb:/data/restore
-	docker-compose exec mongodb mongorestore --username admin --password password123 --authenticationDatabase admin /data/restore
-	@echo "✅ Backup restaurado!" 
-
-
-.PHONY: generate-key
-generate-key:  ## Gera as chaves do projeto
-	@echo ${YELLOW}Generating key${WHITE}
-	@openssl ecparam -name prime256v1 -genkey -noout -out ecdsa_private.pem
-	@openssl ec -in ecdsa_private.pem -pubout -out ecdsa_public.pem
+# Comando padrão
+.DEFAULT_GOAL := help

@@ -24,10 +24,10 @@ type OTPService interface {
 
 type otpService struct {
 	otpRepo repositories.OTPRepository
-	config  configs.Environment
+	config  *configs.Environment
 }
 
-func NewOTPService(otpRepo repositories.OTPRepository, config configs.Environment) OTPService {
+func NewOTPService(otpRepo repositories.OTPRepository, config *configs.Environment) OTPService {
 	return &otpService{
 		otpRepo: otpRepo,
 		config:  config,

@@ -6,12 +6,14 @@ import (
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 	"github.com/aetheris-lab/aetheris-id/api/internal/server"
 	"github.com/aetheris-lab/aetheris-id/api/internal/services"
+	"github.com/aetheris-lab/aetheris-id/api/pkg/ecdsa"
 	"github.com/aetheris-lab/aetheris-id/api/pkg/injector"
 	"go.uber.org/dig"
 )
 
 func BuildContainer(container *dig.Container) {
 	// Handlers
+	injector.Provide(container, handlers.NewAuthHandler)
 	injector.Provide(container, handlers.NewClientHandler)
 	injector.Provide(container, handlers.NewOAuthHandler)
 
@@ -36,4 +38,8 @@ func BuildContainer(container *dig.Container) {
 
 	// Middlewares
 	injector.Provide(container, middlewares.NewAuthMiddleware)
+	injector.Provide(container, middlewares.NewCookieMiddleware)
+
+	// Utils
+	injector.Provide(container, ecdsa.NewEcdsaKeyPair)
 }
