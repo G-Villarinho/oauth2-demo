@@ -51,6 +51,7 @@ func (s *authorizationCodeService) CreateAuthorizationCode(ctx context.Context, 
 		CodeChallenge:       input.CodeChallenge,
 		CodeChallengeMethod: input.CodeChallengeMethod,
 		ExpiresAt:           expiresAt,
+		Scopes:              input.Scopes,
 	}
 
 	if err := s.authorizationCodeRepo.Create(ctx, authorizationCode); err != nil {

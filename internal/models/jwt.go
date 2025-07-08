@@ -8,11 +8,12 @@ type OTPTokenClaims struct {
 
 type AccessTokenClaims struct {
 	jwt.RegisteredClaims
-	FirstName string
-	LastName  string
-	Email     string
+	TokenType string `json:"typ"`
 }
 
-func (a *AccessTokenClaims) GetFullName() string {
-	return a.FirstName + " " + a.LastName
+type IDTokenClaims struct {
+	jwt.RegisteredClaims
+	TokenType string `json:"typ"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
 }

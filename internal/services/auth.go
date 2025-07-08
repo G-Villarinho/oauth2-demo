@@ -61,14 +61,9 @@ func (s *authService) Authenticate(ctx context.Context, code, otpID string) (*mo
 		return nil, fmt.Errorf("validate otp: %w", err)
 	}
 
-	user, err := s.userRepo.FindByID(ctx, otp.UserID.Hex())
-	if err != nil {
-		return nil, fmt.Errorf("find user by id: %w", err)
-	}
-
 	expiresAt := time.Now().Add(s.config.OTP.JWTExpirationMinutes)
 
-	token, err := s.jwtService.GenerateAccessTokenJWT(ctx, user.FirstName, user.LastName, user.Email, user.ID.Hex(), expiresAt)
+	token, err := s.jwtService.GenerateAccessTokenJWT(ctx, otp.UserID.Hex(), expiresAt)
 	if err != nil {
 		return nil, fmt.Errorf("generate access token jwt: %w", err)
 	}

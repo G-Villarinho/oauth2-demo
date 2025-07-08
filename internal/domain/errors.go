@@ -26,5 +26,7 @@ var (
 	ErrAuthorizationCodeInvalid  = errors.New("authorization code invalid")
 
 	// OAuth
-	ErrInvalidResponseType = errors.New("invalid response type")
+	ErrInvalidResponseType     = errors.New("invalid response type")
+	ErrUnauthorizedClient      = errors.New("unauthorized client")
+	ErrUnauthorizedRedirectURI = errors.New("unauthorized redirect uri")
 )

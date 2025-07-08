@@ -8,11 +8,13 @@ import (
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
 	"github.com/aetheris-lab/aetheris-id/api/pkg/ecdsa"
 	"github.com/golang-jwt/jwt/v5"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JWTService interface {
 	GenerateOTPTokenJWT(ctx context.Context, jti string, expiresAt time.Time) (string, error)
-	GenerateAccessTokenJWT(ctx context.Context, firstName, lastName, email, userID string, expiresAt time.Time) (string, error)
+	GenerateAccessTokenJWT(ctx context.Context, userID string, expiresAt time.Time) (string, error)
+	GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Time) (string, error)
 	ValidateOTPTokenJWT(ctx context.Context, token string) (models.OTPTokenClaims, error)
 	ValidateAccessTokenJWT(ctx context.Context, token string) (models.AccessTokenClaims, error)
 }
@@ -52,7 +54,7 @@ func (s *jwtService) GenerateOTPTokenJWT(ctx context.Context, jti string, expire
 	return tokenString, nil
 }
 
-func (s *jwtService) GenerateAccessTokenJWT(ctx context.Context, firstName, lastName, email, userID string, expiresAt time.Time) (string, error) {
+func (s *jwtService) GenerateAccessTokenJWT(ctx context.Context, userID string, expiresAt time.Time) (string, error) {
 	privateKey, err := s.ecdsa.ParseECDSAPrivateKey()
 	if err != nil {
 		return "", fmt.Errorf("parse ecdsa private key: %w", err)
@@ -60,16 +62,42 @@ func (s *jwtService) GenerateAccessTokenJWT(ctx context.Context, firstName, last
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, models.AccessTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "aetheris-id",
-			ID:        userID,
+			Issuer:    "https://id.aetheris-lab.com",
+			ID:        primitive.NewObjectID().Hex(),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
-			Audience:  jwt.ClaimStrings{"aetheris-id"},
+			Audience:  jwt.ClaimStrings{"https://app.aetheris-lab.com"},
+			Subject:   userID,
 		},
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
+		TokenType: "Bearer",
+	})
+
+	tokenString, err := token.SignedString(privateKey)
+	if err != nil {
+		return "", fmt.Errorf("sign token: %w", err)
+	}
+
+	return tokenString, nil
+}
+
+func (s *jwtService) GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Time) (string, error) {
+	privateKey, err := s.ecdsa.ParseECDSAPrivateKey()
+	if err != nil {
+		return "", fmt.Errorf("parse ecdsa private key: %w", err)
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, models.IDTokenClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "https://id.aetheris-lab.com",
+			ID:        primitive.NewObjectID().Hex(),
+			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			Audience:  jwt.ClaimStrings{"https://app.aetheris-lab.com"},
+			Subject:   userID,
+		},
+		TokenType: "Bearer",
 	})
 
 	tokenString, err := token.SignedString(privateKey)

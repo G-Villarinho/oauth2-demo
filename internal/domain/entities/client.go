@@ -76,19 +76,3 @@ func (c *Client) ValidateScopes(scopes []string) error {
 	}
 	return nil
 }
-
-func (c *Client) ValidateRequest(redirectURI string, responseType string, scopes []string) error {
-	if err := c.ValidateRedirectURI(redirectURI); err != nil {
-		return err
-	}
-
-	if err := c.ValidateResponseType(responseType); err != nil {
-		return err
-	}
-
-	if err := c.ValidateScopes(scopes); err != nil {
-		return err
-	}
-
-	return nil
-}

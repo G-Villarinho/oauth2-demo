@@ -6,4 +6,5 @@ type CreateAuthorizationCodeInput struct {
 	RedirectURI         string
 	CodeChallenge       string
 	CodeChallengeMethod string
+	Scopes              []string
 }

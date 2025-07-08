@@ -4,33 +4,42 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/configs"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain/scopes"
 	"github.com/aetheris-lab/aetheris-id/api/internal/models"
+	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 )
 
 type OAuthService interface {
 	Authorize(ctx context.Context, input models.AuthorizeInput) (*models.AuthorizeResponse, error)
+	ExchangeCodeForToken(ctx context.Context, input models.ExchangeAuthorizationCodeInput) (*models.TokenResponse, error)
 }
 
 type oauthService struct {
-	clientService            clientService
-	authorizationCodeService authorizationCodeService
-	jwtService               jwtService
-	config                   *configs.Environment
+	clientService   clientService
+	authCodeService authorizationCodeService
+	jwtService      jwtService
+	userRepo        repositories.UserRepository
+	config          *configs.Environment
 }
 
 func NewOAuthService(
 	clientService clientService,
-	authorizationCodeService authorizationCodeService,
+	authCodeService authorizationCodeService,
 	jwtService jwtService,
+	userRepo repositories.UserRepository,
 	config *configs.Environment,
 ) OAuthService {
 	return &oauthService{
-		clientService:            clientService,
-		authorizationCodeService: authorizationCodeService,
-		jwtService:               jwtService,
-		config:                   config,
+		clientService:   clientService,
+		authCodeService: authCodeService,
+		jwtService:      jwtService,
+		userRepo:        userRepo,
+		config:          config,
 	}
 }
 
@@ -51,11 +60,84 @@ func (s *oauthService) Authorize(ctx context.Context, input models.AuthorizeInpu
 		return nil, fmt.Errorf("get client by client_id: %w", err)
 	}
 
-	if err := client.ValidateRequest(input.RedirectURI, input.ResponseType, input.Scope); err != nil {
+	if err := s.validateOAuthParameters(client, input); err != nil {
 		return nil, fmt.Errorf("validate request: %w", err)
 	}
 
-	return nil, nil
+	authorizationCodeInput := models.CreateAuthorizationCodeInput{
+		UserID:              input.UserID,
+		ClientID:            input.ClientID,
+		RedirectURI:         input.RedirectURI,
+		CodeChallenge:       input.CodeChallenge,
+		CodeChallengeMethod: input.CodeChallengeMethod,
+		Scopes:              input.Scope,
+	}
+	authorizationCode, err := s.authCodeService.CreateAuthorizationCode(ctx, authorizationCodeInput)
+	if err != nil {
+		return nil, fmt.Errorf("create authorization code: %w", err)
+	}
+
+	callbackURL, err := s.callbackURL(authorizationCode.Code, input.State, input.RedirectURI)
+	if err != nil {
+		return nil, fmt.Errorf("callback url: %w", err)
+	}
+
+	return &models.AuthorizeResponse{
+		RedirectURL: callbackURL,
+	}, nil
+}
+
+func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.ExchangeAuthorizationCodeInput) (*models.TokenResponse, error) {
+	authorizationCode, err := s.authCodeService.ValidateAuthorizationCode(ctx, input.Code, input.CodeVerifier)
+	if err != nil {
+		return nil, fmt.Errorf("validate authorization code: %w", err)
+	}
+
+	if authorizationCode.ClientID != input.ClientID {
+		return nil, fmt.Errorf("exchange code for token %w: %s", domain.ErrUnauthorizedClient, input.ClientID)
+	}
+
+	if authorizationCode.RedirectURI != input.RedirectURI {
+		return nil, fmt.Errorf("exchange code for token %w", domain.ErrUnauthorizedRedirectURI)
+	}
+
+	client, err := s.clientService.GetClientByClientID(ctx, authorizationCode.ClientID)
+	if err != nil {
+		return nil, fmt.Errorf("get client by client_id: %w", err)
+	}
+
+	hasRefreshToken := client.IsValidGrantType("refresh_token")
+	hasOpenID := scopes.HasScope(authorizationCode.Scopes, "openid")
+
+	accessTokenExpiresAt := time.Now().Add(time.Hour * 1)
+	if hasRefreshToken {
+		accessTokenExpiresAt = time.Now().Add(time.Minute * 15)
+	}
+
+	accessToken, err := s.jwtService.GenerateAccessTokenJWT(ctx, authorizationCode.UserID, accessTokenExpiresAt)
+	if err != nil {
+		return nil, fmt.Errorf("generate access token: %w", err)
+	}
+
+	var idToken string
+	if hasOpenID {
+		user, err := s.userRepo.FindByID(ctx, authorizationCode.UserID)
+		if err != nil {
+			return nil, fmt.Errorf("find user by id: %w", err)
+		}
+
+		idToken, err = s.jwtService.GenerateIDTokenJWT(ctx, authorizationCode.UserID, user.GetFullName(), user.Email, accessTokenExpiresAt)
+		if err != nil {
+			return nil, fmt.Errorf("generate id token: %w", err)
+		}
+	}
+
+	return &models.TokenResponse{
+		AccessToken: accessToken,
+		IDToken:     idToken,
+		TokenType:   "Bearer",
+		ExpiresIn:   int64(time.Until(accessTokenExpiresAt).Seconds()),
+	}, nil
 }
 
 func (s *oauthService) loginRedirectURL(input models.AuthorizeInput) (string, error) {
@@ -82,7 +164,7 @@ func (s *oauthService) authorizeURL(input models.AuthorizeInput) (string, error)
 		return "", fmt.Errorf("invalid base url: %w", err)
 	}
 
-	baseURL.Path = "/authorize"
+	baseURL.Path = "/oauth/authorize"
 
 	query := baseURL.Query()
 	query.Set("client_id", input.ClientID)
@@ -95,4 +177,35 @@ func (s *oauthService) authorizeURL(input models.AuthorizeInput) (string, error)
 	baseURL.RawQuery = query.Encode()
 
 	return baseURL.String(), nil
+}
+
+func (s *oauthService) callbackURL(code, state, redirectURI string) (string, error) {
+	redirectURL, err := url.Parse(redirectURI)
+	if err != nil {
+		return "", fmt.Errorf("invalid redirect uri: %w", err)
+	}
+
+	query := redirectURL.Query()
+	query.Set("code", code)
+	query.Set("state", state)
+
+	redirectURL.RawQuery = query.Encode()
+
+	return redirectURL.String(), nil
+}
+
+func (s *oauthService) validateOAuthParameters(client *entities.Client, input models.AuthorizeInput) error {
+	if !client.IsValidRedirectURI(input.RedirectURI) {
+		return fmt.Errorf("%w: %s", domain.ErrInvalidRedirectURI, input.RedirectURI)
+	}
+
+	if err := client.ValidateResponseType(input.ResponseType); err != nil {
+		return err
+	}
+
+	if err := client.ValidateScopes(input.Scope); err != nil {
+		return err
+	}
+
+	return nil
 }
