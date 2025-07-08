@@ -27,3 +27,11 @@ func (a *AuthorizationCode) IsExpired() bool {
 func (a *AuthorizationCode) HasScope(scope string) bool {
 	return slices.Contains(a.Scopes, scope)
 }
+
+func (a *AuthorizationCode) IsValidRedirectURI(redirectURI string) bool {
+	return a.RedirectURI == redirectURI
+}
+
+func (a *AuthorizationCode) IsValidClientID(clientID string) bool {
+	return a.ClientID == clientID
+}

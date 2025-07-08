@@ -93,11 +93,11 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 		return nil, fmt.Errorf("validate authorization code: %w", err)
 	}
 
-	if authorizationCode.ClientID != input.ClientID {
+	if !authorizationCode.IsValidClientID(input.ClientID) {
 		return nil, fmt.Errorf("exchange code for token %w: %s", domain.ErrUnauthorizedClient, input.ClientID)
 	}
 
-	if authorizationCode.RedirectURI != input.RedirectURI {
+	if !authorizationCode.IsValidRedirectURI(input.RedirectURI) {
 		return nil, fmt.Errorf("exchange code for token %w", domain.ErrUnauthorizedRedirectURI)
 	}
 
@@ -109,9 +109,9 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 	hasRefreshToken := client.IsValidGrantType("refresh_token")
 	hasOpenID := scopes.HasScope(authorizationCode.Scopes, "openid")
 
-	accessTokenExpiresAt := time.Now().Add(time.Hour * 1)
+	accessTokenExpiresAt := time.Now().Add(s.config.Security.AccessTokenExpirationHours)
 	if hasRefreshToken {
-		accessTokenExpiresAt = time.Now().Add(time.Minute * 15)
+		accessTokenExpiresAt = time.Now().Add(s.config.Security.RefreshTokenExpirationHours)
 	}
 
 	accessToken, err := s.jwtService.GenerateAccessTokenJWT(ctx, authorizationCode.UserID, accessTokenExpiresAt)
@@ -126,7 +126,7 @@ func (s *oauthService) ExchangeCodeForToken(ctx context.Context, input models.Ex
 			return nil, fmt.Errorf("find user by id: %w", err)
 		}
 
-		idToken, err = s.jwtService.GenerateIDTokenJWT(ctx, authorizationCode.UserID, user.GetFullName(), user.Email, accessTokenExpiresAt)
+		idToken, err = s.jwtService.GenerateIDTokenJWT(ctx, authorizationCode.UserID, user.GetFullName(), user.Email, s.config.Security.IDTokenExpirationMinutes)
 		if err != nil {
 			return nil, fmt.Errorf("generate id token: %w", err)
 		}

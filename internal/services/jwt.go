@@ -14,7 +14,7 @@ import (
 type JWTService interface {
 	GenerateOTPTokenJWT(ctx context.Context, jti string, expiresAt time.Time) (string, error)
 	GenerateAccessTokenJWT(ctx context.Context, userID string, expiresAt time.Time) (string, error)
-	GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Time) (string, error)
+	GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Duration) (string, error)
 	ValidateOTPTokenJWT(ctx context.Context, token string) (models.OTPTokenClaims, error)
 	ValidateAccessTokenJWT(ctx context.Context, token string) (models.AccessTokenClaims, error)
 }
@@ -81,7 +81,7 @@ func (s *jwtService) GenerateAccessTokenJWT(ctx context.Context, userID string, 
 	return tokenString, nil
 }
 
-func (s *jwtService) GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Time) (string, error) {
+func (s *jwtService) GenerateIDTokenJWT(ctx context.Context, userID, name, email string, expiresAt time.Duration) (string, error) {
 	privateKey, err := s.ecdsa.ParseECDSAPrivateKey()
 	if err != nil {
 		return "", fmt.Errorf("parse ecdsa private key: %w", err)
@@ -93,7 +93,7 @@ func (s *jwtService) GenerateIDTokenJWT(ctx context.Context, userID, name, email
 			ID:        primitive.NewObjectID().Hex(),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
-			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiresAt)),
 			Audience:  jwt.ClaimStrings{"https://app.aetheris-lab.com"},
 			Subject:   userID,
 		},

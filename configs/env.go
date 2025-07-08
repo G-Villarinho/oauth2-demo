@@ -36,9 +36,13 @@ type MongoDB struct {
 }
 
 type Security struct {
-	JWTExpirationHours time.Duration `env:"JWT_EXPIRATION_HOURS,default=2h"`
-	BcryptCost         int           `env:"BCRYPT_COST,default=12"`
-	CookieName         string        `env:"COOKIE_NAME,default=auth_token"`
+	JWTExpirationHours           time.Duration `env:"JWT_EXPIRATION_HOURS,default=2h"`
+	BcryptCost                   int           `env:"BCRYPT_COST,default=12"`
+	CookieName                   string        `env:"COOKIE_NAME,default=auth_token"`
+	RefreshTokenExpirationHours  time.Duration `env:"REFRESH_TOKEN_EXPIRATION_HOURS,default=168h"`
+	AccessTokenExpirationHours   time.Duration `env:"ACCESS_TOKEN_EXPIRATION_HOURS,default=1h"`
+	AccessTokenExpirationMinutes time.Duration `env:"ACCESS_TOKEN_EXPIRATION_MINUTES,default=15m"`
+	IDTokenExpirationMinutes     time.Duration `env:"ID_TOKEN_EXPIRATION_MINUTES,default=15m"`
 }
 
 type Cors struct {
