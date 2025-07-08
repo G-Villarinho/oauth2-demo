@@ -20,20 +20,20 @@ type OAuthService interface {
 }
 
 type oauthService struct {
-	clientService       clientService
-	authCodeService     authorizationCodeService
-	jwtService          jwtService
+	clientService       ClientService
+	authCodeService     AuthorizationCodeService
+	jwtService          JWTService
 	userRepo            repositories.UserRepository
-	refreshTokenService refreshTokenService
+	refreshTokenService RefreshTokenService
 	config              *configs.Environment
 }
 
 func NewOAuthService(
-	clientService clientService,
-	authCodeService authorizationCodeService,
-	jwtService jwtService,
+	clientService ClientService,
+	authCodeService AuthorizationCodeService,
+	jwtService JWTService,
 	userRepo repositories.UserRepository,
-	refreshTokenService refreshTokenService,
+	refreshTokenService RefreshTokenService,
 	config *configs.Environment,
 ) OAuthService {
 	return &oauthService{

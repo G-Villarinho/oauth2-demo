@@ -86,29 +86,29 @@ func (_c *ClientServiceMock_CreateClient_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
-// ValidateClient provides a mock function with given fields: ctx, clientID, redirectURI, grantTypes, scopes
-func (_m *ClientServiceMock) ValidateClient(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string) (*entities.Client, error) {
-	ret := _m.Called(ctx, clientID, redirectURI, grantTypes, scopes)
+// GetClientByClientID provides a mock function with given fields: ctx, clientID
+func (_m *ClientServiceMock) GetClientByClientID(ctx context.Context, clientID string) (*entities.Client, error) {
+	ret := _m.Called(ctx, clientID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ValidateClient")
+		panic("no return value specified for GetClientByClientID")
 	}
 
 	var r0 *entities.Client
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, []string, []string) (*entities.Client, error)); ok {
-		return rf(ctx, clientID, redirectURI, grantTypes, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entities.Client, error)); ok {
+		return rf(ctx, clientID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, []string, []string) *entities.Client); ok {
-		r0 = rf(ctx, clientID, redirectURI, grantTypes, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entities.Client); ok {
+		r0 = rf(ctx, clientID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entities.Client)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, []string, []string) error); ok {
-		r1 = rf(ctx, clientID, redirectURI, grantTypes, scopes)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, clientID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -116,34 +116,31 @@ func (_m *ClientServiceMock) ValidateClient(ctx context.Context, clientID string
 	return r0, r1
 }
 
-// ClientServiceMock_ValidateClient_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateClient'
-type ClientServiceMock_ValidateClient_Call struct {
+// ClientServiceMock_GetClientByClientID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetClientByClientID'
+type ClientServiceMock_GetClientByClientID_Call struct {
 	*mock.Call
 }
 
-// ValidateClient is a helper method to define mock.On call
+// GetClientByClientID is a helper method to define mock.On call
 //   - ctx context.Context
 //   - clientID string
-//   - redirectURI string
-//   - grantTypes []string
-//   - scopes []string
-func (_e *ClientServiceMock_Expecter) ValidateClient(ctx interface{}, clientID interface{}, redirectURI interface{}, grantTypes interface{}, scopes interface{}) *ClientServiceMock_ValidateClient_Call {
-	return &ClientServiceMock_ValidateClient_Call{Call: _e.mock.On("ValidateClient", ctx, clientID, redirectURI, grantTypes, scopes)}
+func (_e *ClientServiceMock_Expecter) GetClientByClientID(ctx interface{}, clientID interface{}) *ClientServiceMock_GetClientByClientID_Call {
+	return &ClientServiceMock_GetClientByClientID_Call{Call: _e.mock.On("GetClientByClientID", ctx, clientID)}
 }
 
-func (_c *ClientServiceMock_ValidateClient_Call) Run(run func(ctx context.Context, clientID string, redirectURI string, grantTypes []string, scopes []string)) *ClientServiceMock_ValidateClient_Call {
+func (_c *ClientServiceMock_GetClientByClientID_Call) Run(run func(ctx context.Context, clientID string)) *ClientServiceMock_GetClientByClientID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].([]string), args[4].([]string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *ClientServiceMock_ValidateClient_Call) Return(_a0 *entities.Client, _a1 error) *ClientServiceMock_ValidateClient_Call {
+func (_c *ClientServiceMock_GetClientByClientID_Call) Return(_a0 *entities.Client, _a1 error) *ClientServiceMock_GetClientByClientID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ClientServiceMock_ValidateClient_Call) RunAndReturn(run func(context.Context, string, string, []string, []string) (*entities.Client, error)) *ClientServiceMock_ValidateClient_Call {
+func (_c *ClientServiceMock_GetClientByClientID_Call) RunAndReturn(run func(context.Context, string) (*entities.Client, error)) *ClientServiceMock_GetClientByClientID_Call {
 	_c.Call.Return(run)
 	return _c
 }

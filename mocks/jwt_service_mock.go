@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	models "github.com/aetheris-lab/aetheris-id/api/internal/models"
 	mock "github.com/stretchr/testify/mock"
 
 	time "time"
@@ -23,9 +24,9 @@ func (_m *JWTServiceMock) EXPECT() *JWTServiceMock_Expecter {
 	return &JWTServiceMock_Expecter{mock: &_m.Mock}
 }
 
-// GenerateAccessTokenJWT provides a mock function with given fields: ctx, firstName, lastName, email, userID, expiresAt
-func (_m *JWTServiceMock) GenerateAccessTokenJWT(ctx context.Context, firstName string, lastName string, email string, userID string, expiresAt time.Time) (string, error) {
-	ret := _m.Called(ctx, firstName, lastName, email, userID, expiresAt)
+// GenerateAccessTokenJWT provides a mock function with given fields: ctx, userID, expiresAt
+func (_m *JWTServiceMock) GenerateAccessTokenJWT(ctx context.Context, userID string, expiresAt time.Time) (string, error) {
+	ret := _m.Called(ctx, userID, expiresAt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateAccessTokenJWT")
@@ -33,17 +34,17 @@ func (_m *JWTServiceMock) GenerateAccessTokenJWT(ctx context.Context, firstName 
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, time.Time) (string, error)); ok {
-		return rf(ctx, firstName, lastName, email, userID, expiresAt)
+	if rf, ok := ret.Get(0).(func(context.Context, string, time.Time) (string, error)); ok {
+		return rf(ctx, userID, expiresAt)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, time.Time) string); ok {
-		r0 = rf(ctx, firstName, lastName, email, userID, expiresAt)
+	if rf, ok := ret.Get(0).(func(context.Context, string, time.Time) string); ok {
+		r0 = rf(ctx, userID, expiresAt)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, string, time.Time) error); ok {
-		r1 = rf(ctx, firstName, lastName, email, userID, expiresAt)
+	if rf, ok := ret.Get(1).(func(context.Context, string, time.Time) error); ok {
+		r1 = rf(ctx, userID, expiresAt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -58,18 +59,15 @@ type JWTServiceMock_GenerateAccessTokenJWT_Call struct {
 
 // GenerateAccessTokenJWT is a helper method to define mock.On call
 //   - ctx context.Context
-//   - firstName string
-//   - lastName string
-//   - email string
 //   - userID string
 //   - expiresAt time.Time
-func (_e *JWTServiceMock_Expecter) GenerateAccessTokenJWT(ctx interface{}, firstName interface{}, lastName interface{}, email interface{}, userID interface{}, expiresAt interface{}) *JWTServiceMock_GenerateAccessTokenJWT_Call {
-	return &JWTServiceMock_GenerateAccessTokenJWT_Call{Call: _e.mock.On("GenerateAccessTokenJWT", ctx, firstName, lastName, email, userID, expiresAt)}
+func (_e *JWTServiceMock_Expecter) GenerateAccessTokenJWT(ctx interface{}, userID interface{}, expiresAt interface{}) *JWTServiceMock_GenerateAccessTokenJWT_Call {
+	return &JWTServiceMock_GenerateAccessTokenJWT_Call{Call: _e.mock.On("GenerateAccessTokenJWT", ctx, userID, expiresAt)}
 }
 
-func (_c *JWTServiceMock_GenerateAccessTokenJWT_Call) Run(run func(ctx context.Context, firstName string, lastName string, email string, userID string, expiresAt time.Time)) *JWTServiceMock_GenerateAccessTokenJWT_Call {
+func (_c *JWTServiceMock_GenerateAccessTokenJWT_Call) Run(run func(ctx context.Context, userID string, expiresAt time.Time)) *JWTServiceMock_GenerateAccessTokenJWT_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(string), args[5].(time.Time))
+		run(args[0].(context.Context), args[1].(string), args[2].(time.Time))
 	})
 	return _c
 }
@@ -79,7 +77,67 @@ func (_c *JWTServiceMock_GenerateAccessTokenJWT_Call) Return(_a0 string, _a1 err
 	return _c
 }
 
-func (_c *JWTServiceMock_GenerateAccessTokenJWT_Call) RunAndReturn(run func(context.Context, string, string, string, string, time.Time) (string, error)) *JWTServiceMock_GenerateAccessTokenJWT_Call {
+func (_c *JWTServiceMock_GenerateAccessTokenJWT_Call) RunAndReturn(run func(context.Context, string, time.Time) (string, error)) *JWTServiceMock_GenerateAccessTokenJWT_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GenerateIDTokenJWT provides a mock function with given fields: ctx, userID, name, email, expiresAt
+func (_m *JWTServiceMock) GenerateIDTokenJWT(ctx context.Context, userID string, name string, email string, expiresAt time.Duration) (string, error) {
+	ret := _m.Called(ctx, userID, name, email, expiresAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateIDTokenJWT")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, time.Duration) (string, error)); ok {
+		return rf(ctx, userID, name, email, expiresAt)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, time.Duration) string); ok {
+		r0 = rf(ctx, userID, name, email, expiresAt)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, time.Duration) error); ok {
+		r1 = rf(ctx, userID, name, email, expiresAt)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// JWTServiceMock_GenerateIDTokenJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateIDTokenJWT'
+type JWTServiceMock_GenerateIDTokenJWT_Call struct {
+	*mock.Call
+}
+
+// GenerateIDTokenJWT is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID string
+//   - name string
+//   - email string
+//   - expiresAt time.Duration
+func (_e *JWTServiceMock_Expecter) GenerateIDTokenJWT(ctx interface{}, userID interface{}, name interface{}, email interface{}, expiresAt interface{}) *JWTServiceMock_GenerateIDTokenJWT_Call {
+	return &JWTServiceMock_GenerateIDTokenJWT_Call{Call: _e.mock.On("GenerateIDTokenJWT", ctx, userID, name, email, expiresAt)}
+}
+
+func (_c *JWTServiceMock_GenerateIDTokenJWT_Call) Run(run func(ctx context.Context, userID string, name string, email string, expiresAt time.Duration)) *JWTServiceMock_GenerateIDTokenJWT_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(time.Duration))
+	})
+	return _c
+}
+
+func (_c *JWTServiceMock_GenerateIDTokenJWT_Call) Return(_a0 string, _a1 error) *JWTServiceMock_GenerateIDTokenJWT_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *JWTServiceMock_GenerateIDTokenJWT_Call) RunAndReturn(run func(context.Context, string, string, string, time.Duration) (string, error)) *JWTServiceMock_GenerateIDTokenJWT_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -138,6 +196,120 @@ func (_c *JWTServiceMock_GenerateOTPTokenJWT_Call) Return(_a0 string, _a1 error)
 }
 
 func (_c *JWTServiceMock_GenerateOTPTokenJWT_Call) RunAndReturn(run func(context.Context, string, time.Time) (string, error)) *JWTServiceMock_GenerateOTPTokenJWT_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ValidateAccessTokenJWT provides a mock function with given fields: ctx, token
+func (_m *JWTServiceMock) ValidateAccessTokenJWT(ctx context.Context, token string) (models.AccessTokenClaims, error) {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ValidateAccessTokenJWT")
+	}
+
+	var r0 models.AccessTokenClaims
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.AccessTokenClaims, error)); ok {
+		return rf(ctx, token)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.AccessTokenClaims); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Get(0).(models.AccessTokenClaims)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, token)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// JWTServiceMock_ValidateAccessTokenJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateAccessTokenJWT'
+type JWTServiceMock_ValidateAccessTokenJWT_Call struct {
+	*mock.Call
+}
+
+// ValidateAccessTokenJWT is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+func (_e *JWTServiceMock_Expecter) ValidateAccessTokenJWT(ctx interface{}, token interface{}) *JWTServiceMock_ValidateAccessTokenJWT_Call {
+	return &JWTServiceMock_ValidateAccessTokenJWT_Call{Call: _e.mock.On("ValidateAccessTokenJWT", ctx, token)}
+}
+
+func (_c *JWTServiceMock_ValidateAccessTokenJWT_Call) Run(run func(ctx context.Context, token string)) *JWTServiceMock_ValidateAccessTokenJWT_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *JWTServiceMock_ValidateAccessTokenJWT_Call) Return(_a0 models.AccessTokenClaims, _a1 error) *JWTServiceMock_ValidateAccessTokenJWT_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *JWTServiceMock_ValidateAccessTokenJWT_Call) RunAndReturn(run func(context.Context, string) (models.AccessTokenClaims, error)) *JWTServiceMock_ValidateAccessTokenJWT_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ValidateOTPTokenJWT provides a mock function with given fields: ctx, token
+func (_m *JWTServiceMock) ValidateOTPTokenJWT(ctx context.Context, token string) (models.OTPTokenClaims, error) {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ValidateOTPTokenJWT")
+	}
+
+	var r0 models.OTPTokenClaims
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.OTPTokenClaims, error)); ok {
+		return rf(ctx, token)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.OTPTokenClaims); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Get(0).(models.OTPTokenClaims)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, token)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// JWTServiceMock_ValidateOTPTokenJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateOTPTokenJWT'
+type JWTServiceMock_ValidateOTPTokenJWT_Call struct {
+	*mock.Call
+}
+
+// ValidateOTPTokenJWT is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+func (_e *JWTServiceMock_Expecter) ValidateOTPTokenJWT(ctx interface{}, token interface{}) *JWTServiceMock_ValidateOTPTokenJWT_Call {
+	return &JWTServiceMock_ValidateOTPTokenJWT_Call{Call: _e.mock.On("ValidateOTPTokenJWT", ctx, token)}
+}
+
+func (_c *JWTServiceMock_ValidateOTPTokenJWT_Call) Run(run func(ctx context.Context, token string)) *JWTServiceMock_ValidateOTPTokenJWT_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *JWTServiceMock_ValidateOTPTokenJWT_Call) Return(_a0 models.OTPTokenClaims, _a1 error) *JWTServiceMock_ValidateOTPTokenJWT_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *JWTServiceMock_ValidateOTPTokenJWT_Call) RunAndReturn(run func(context.Context, string) (models.OTPTokenClaims, error)) *JWTServiceMock_ValidateOTPTokenJWT_Call {
 	_c.Call.Return(run)
 	return _c
 }
