@@ -8,7 +8,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password123
-      MONGO_INITDB_DATABASE: aetheris_test
+      MONGO_INITDB_DATABASE: aetheris
     ports:
       - "27017:27017"
     volumes:
@@ -34,84 +34,6 @@ services:
       - mongodb
     networks:
       - aetheris-network
-
-  # Aplicação Go
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: aetheris-app
-    restart: unless-stopped
-    environment:
-      ENVIRONMENT: test
-      MONGODB_CONNECTION_URI: mongodb://admin:password123@mongodb:27017/
-      MONGODB_DATABASE_NAME: aetheris_test
-      SERVER_PORT: 8080
-      SERVER_HOST: 0.0.0.0
-      API_BASE_URL: http://localhost:8080
-      CLIENT_LOGIN_URL: http://localhost:3000
-      SMTP_USER: test@example.com
-      SMTP_PASS: testpass
-      SMTP_HOST: smtp.example.com
-      SMTP_PORT: 587
-      CORS_ALLOWED_ORIGINS: "*"
-      CORS_ALLOWED_METHODS: "GET|POST|PUT|DELETE|OPTIONS"
-      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
-      RATE_LIMIT_MAX_REQUESTS: 100
-      RATE_LIMIT_WINDOW: 1m
-      JWT_EXPIRATION_HOURS: 2h
-      BCRYPT_COST: 12
-      COOKIE_NAME: auth_token
-      REFRESH_TOKEN_EXPIRATION_HOURS: 168h
-      ACCESS_TOKEN_EXPIRATION_HOURS: 1h
-      ACCESS_TOKEN_EXPIRATION_MINUTES: 15m
-      ID_TOKEN_EXPIRATION_MINUTES: 15m
-      OTP_EXPIRATION_MINUTES: 10m
-      JWT_EXPIRATION_MINUTES: 10m
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./test/keys:/app/keys:ro
-    depends_on:
-      - mongodb
-    networks:
-      - aetheris-network
-
-  # Serviço de teste E2E
-  e2e-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
-    container_name: aetheris-e2e-tests
-    environment:
-      MONGODB_CONNECTION_URI: mongodb://admin:password123@mongodb:27017/
-      MONGODB_DATABASE_NAME: aetheris_test
-      API_BASE_URL: http://app:8080
-      CLIENT_LOGIN_URL: http://localhost:3000
-      SMTP_USER: test@example.com
-      SMTP_PASS: testpass
-      SMTP_HOST: smtp.example.com
-      SMTP_PORT: 587
-      CORS_ALLOWED_ORIGINS: "*"
-      CORS_ALLOWED_METHODS: "GET|POST|PUT|DELETE|OPTIONS"
-      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
-      RATE_LIMIT_MAX_REQUESTS: 100
-      RATE_LIMIT_WINDOW: 1m
-      JWT_EXPIRATION_HOURS: 2h
-      BCRYPT_COST: 12
-      COOKIE_NAME: auth_token
-      REFRESH_TOKEN_EXPIRATION_HOURS: 168h
-      ACCESS_TOKEN_EXPIRATION_HOURS: 1h
-      ACCESS_TOKEN_EXPIRATION_MINUTES: 15m
-      ID_TOKEN_EXPIRATION_MINUTES: 15m
-      OTP_EXPIRATION_MINUTES: 10m
-      JWT_EXPIRATION_MINUTES: 10m
-    depends_on:
-      - app
-      - mongodb
-    networks:
-      - aetheris-network
-    command: ["go", "test", "./test/e2e", "-v", "-timeout", "30s"]
 
 volumes:
   mongodb_data:

@@ -19,10 +19,10 @@ type authService struct {
 	userRepo   repositories.UserRepository
 	otpService OTPService
 	jwtService JWTService
-	config     *configs.Environment
+	config     configs.Environment
 }
 
-func NewAuthService(userRepo repositories.UserRepository, otpService OTPService, jwtService JWTService, config *configs.Environment) AuthService {
+func NewAuthService(userRepo repositories.UserRepository, otpService OTPService, jwtService JWTService, config configs.Environment) AuthService {
 	return &authService{
 		userRepo:   userRepo,
 		otpService: otpService,

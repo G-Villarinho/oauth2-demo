@@ -15,10 +15,10 @@ type EcdsaKeyPair interface {
 }
 
 type ecdsaKeyPair struct {
-	config *configs.Environment
+	config configs.Environment
 }
 
-func NewEcdsaKeyPair(config *configs.Environment) EcdsaKeyPair {
+func NewEcdsaKeyPair(config configs.Environment) EcdsaKeyPair {
 	return &ecdsaKeyPair{
 		config: config,
 	}

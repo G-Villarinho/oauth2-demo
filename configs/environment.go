@@ -28,8 +28,7 @@ func LoadEnviroment(environment *Environment) error {
 	}
 
 	if err := godotenv.Load(); err != nil {
-		// Não falhar se o arquivo .env não existir, usar apenas variáveis de ambiente
-		fmt.Printf("Warning: .env file not found: %v\n", err)
+		return err
 	}
 
 	if _, err := env.UnmarshalFromEnviron(environment); err != nil {
