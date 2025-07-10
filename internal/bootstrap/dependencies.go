@@ -36,4 +36,5 @@ func BuildContainer(container *dig.Container) {
 
 	// Middlewares
 	injector.Provide(container, middlewares.NewAuthMiddleware)
+	injector.Provide(container, middlewares.NewCookieMiddleware)
 }
