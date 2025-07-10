@@ -196,3 +196,115 @@ func TestCreateOTP(t *testing.T) {
 		assert.Contains(t, err.Error(), "convert userID to ObjectID")
 	})
 }
+
+func TestValidateCode(t *testing.T) {
+	t.Run("should validate code and delete OTP successfully", func(t *testing.T) {
+		ctx := context.Background()
+		otpID := "otp-id"
+		code := "123456"
+		otp := &entities.OTP{
+			ID:        primitive.NewObjectID(),
+			Code:      code,
+			ExpiresAt: time.Now().Add(5 * time.Minute),
+		}
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
+		mockOTPRepo.EXPECT().Delete(ctx, otpID).Return(nil)
+
+		config := configs.Environment{}
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		result, err := otpService.ValidateCode(ctx, code, otpID)
+
+		require.NoError(t, err)
+		assert.Equal(t, otp, result)
+	})
+
+	t.Run("should return error when OTP not found", func(t *testing.T) {
+		ctx := context.Background()
+		otpID := "otp-id"
+		code := "123456"
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		errNotFound := errors.New("not found")
+		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(nil, errNotFound)
+
+		config := configs.Environment{}
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		result, err := otpService.ValidateCode(ctx, code, otpID)
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.Contains(t, err.Error(), "find otp by id")
+	})
+
+	t.Run("should return error when code is invalid", func(t *testing.T) {
+		ctx := context.Background()
+		otpID := "otp-id"
+		otp := &entities.OTP{
+			ID:        primitive.NewObjectID(),
+			Code:      "654321",
+			ExpiresAt: time.Now().Add(5 * time.Minute),
+		}
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
+
+		config := configs.Environment{}
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		result, err := otpService.ValidateCode(ctx, "123456", otpID)
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.Contains(t, err.Error(), "validate code")
+	})
+
+	t.Run("should return error when code is expired", func(t *testing.T) {
+		ctx := context.Background()
+		otpID := "otp-id"
+		otp := &entities.OTP{
+			ID:        primitive.NewObjectID(),
+			Code:      "123456",
+			ExpiresAt: time.Now().Add(-1 * time.Minute),
+		}
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
+
+		config := configs.Environment{}
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		result, err := otpService.ValidateCode(ctx, "123456", otpID)
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.Contains(t, err.Error(), "validate code")
+	})
+
+	t.Run("should return error when delete fails after validation", func(t *testing.T) {
+		ctx := context.Background()
+		otpID := "otp-id"
+		code := "123456"
+		otp := &entities.OTP{
+			ID:        primitive.NewObjectID(),
+			Code:      code,
+			ExpiresAt: time.Now().Add(5 * time.Minute),
+		}
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
+		mockOTPRepo.EXPECT().Delete(ctx, otpID).Return(errors.New("delete error"))
+
+		config := configs.Environment{}
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		result, err := otpService.ValidateCode(ctx, code, otpID)
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.Contains(t, err.Error(), "delete otp")
+	})
+}
