@@ -17,8 +17,11 @@ func registerClientRoutes(group *echo.Group, clientHandler handlers.ClientHandle
 }
 
 func registerAuthRoutes(group *echo.Group, h handlers.AuthHandler, authMiddleware middlewares.AuthMiddleware) {
-	group.POST("/auth/login", h.Login)
-	group.POST("/auth/authenticate", h.Authenticate, authMiddleware.EnsureOTPAuthenticated())
+	authGroup := group.Group("/auth")
+
+	authGroup.POST("/login", h.Login)
+	authGroup.POST("/authenticate", h.Authenticate, authMiddleware.EnsureOTPAuthenticated())
+	authGroup.POST("/code/resend", h.ResendVerificationCode, authMiddleware.EnsureOTPAuthenticated())
 }
 
 func registerOAuthRoutes(group *echo.Group, h handlers.OAuthHandler, authMiddleware middlewares.AuthMiddleware) {

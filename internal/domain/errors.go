@@ -5,9 +5,10 @@ import "errors"
 var (
 
 	// OTP
-	ErrOTPNotFound = errors.New("otp not found")
-	ErrInvalidCode = errors.New("invalid code")
-	ErrOTPExpired  = errors.New("otp expired")
+	ErrOTPNotFound      = errors.New("otp not found")
+	ErrInvalidCode      = errors.New("invalid code")
+	ErrOTPExpired       = errors.New("otp expired")
+	ErrOTPNotResendable = errors.New("otp not resendable")
 
 	// Client
 	ErrClientNotFound      = errors.New("client not found")

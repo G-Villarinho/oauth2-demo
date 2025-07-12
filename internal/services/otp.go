@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/configs"
+	"github.com/aetheris-lab/aetheris-id/api/internal/domain"
 	"github.com/aetheris-lab/aetheris-id/api/internal/domain/entities"
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,8 +19,9 @@ const (
 )
 
 type OTPService interface {
-	CreateOTP(ctx context.Context, userID string) (*entities.OTP, error)
+	CreateOTP(ctx context.Context, userID, email string) (*entities.OTP, error)
 	ValidateCode(ctx context.Context, code, otpID string) (*entities.OTP, error)
+	ResendCode(ctx context.Context, otpID string) (*entities.OTP, error)
 }
 
 type otpService struct {
@@ -34,7 +36,7 @@ func NewOTPService(otpRepo repositories.OTPRepository, config configs.Environmen
 	}
 }
 
-func (s *otpService) CreateOTP(ctx context.Context, userID string) (*entities.OTP, error) {
+func (s *otpService) CreateOTP(ctx context.Context, userID, email string) (*entities.OTP, error) {
 	userIDObj, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, fmt.Errorf("convert userID to ObjectID: %w", err)
@@ -42,6 +44,7 @@ func (s *otpService) CreateOTP(ctx context.Context, userID string) (*entities.OT
 
 	otp := &entities.OTP{
 		UserID:    userIDObj,
+		Email:     email,
 		Code:      s.generateOTP(),
 		ExpiresAt: time.Now().UTC().Add(s.config.OTP.ExpirationMinutes),
 	}
@@ -65,6 +68,25 @@ func (s *otpService) ValidateCode(ctx context.Context, code, otpID string) (*ent
 
 	if err := s.otpRepo.Delete(ctx, otpID); err != nil {
 		return nil, fmt.Errorf("delete otp: %w", err)
+	}
+
+	return otp, nil
+}
+
+func (s *otpService) ResendCode(ctx context.Context, otpID string) (*entities.OTP, error) {
+	otp, err := s.otpRepo.FindByID(ctx, otpID)
+	if err != nil {
+		return nil, fmt.Errorf("find otp by id: %w", err)
+	}
+
+	if !otp.IsResendable() {
+		return nil, domain.ErrOTPNotResendable
+	}
+
+	otp.Code = s.generateOTP()
+
+	if err := s.otpRepo.UpdateCode(ctx, otpID, otp.Code); err != nil {
+		return nil, fmt.Errorf("update otp code: %w", err)
 	}
 
 	return otp, nil

@@ -13,6 +13,7 @@ import (
 type AuthService interface {
 	SendVerificationCode(ctx context.Context, email string) (*models.SendVerificationCodeResponse, error)
 	Authenticate(ctx context.Context, code, otpID string) (*models.AuthenticateResponse, error)
+	ResendVerificationCode(ctx context.Context, otpID string) error
 }
 
 type authService struct {
@@ -37,7 +38,7 @@ func (s *authService) SendVerificationCode(ctx context.Context, email string) (*
 		return nil, fmt.Errorf("find user by email: %w", err)
 	}
 
-	otp, err := s.otpService.CreateOTP(ctx, user.ID.Hex())
+	otp, err := s.otpService.CreateOTP(ctx, user.ID.Hex(), email)
 	if err != nil {
 		return nil, fmt.Errorf("create otp: %w", err)
 	}
@@ -72,4 +73,15 @@ func (s *authService) Authenticate(ctx context.Context, code, otpID string) (*mo
 		AccessToken: token,
 		ExpiresAt:   expiresAt,
 	}, nil
+}
+
+func (s *authService) ResendVerificationCode(ctx context.Context, otpID string) error {
+	_, err := s.otpService.ResendCode(ctx, otpID)
+	if err != nil {
+		return fmt.Errorf("resend otp: %w", err)
+	}
+
+	// TODO: Send email with new token
+
+	return nil
 }

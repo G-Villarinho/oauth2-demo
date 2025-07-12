@@ -175,6 +175,54 @@ func (_c *OTPRepositoryMock_FindByID_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// UpdateCode provides a mock function with given fields: ctx, id, code
+func (_m *OTPRepositoryMock) UpdateCode(ctx context.Context, id string, code string) error {
+	ret := _m.Called(ctx, id, code)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateCode")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, id, code)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// OTPRepositoryMock_UpdateCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateCode'
+type OTPRepositoryMock_UpdateCode_Call struct {
+	*mock.Call
+}
+
+// UpdateCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - code string
+func (_e *OTPRepositoryMock_Expecter) UpdateCode(ctx interface{}, id interface{}, code interface{}) *OTPRepositoryMock_UpdateCode_Call {
+	return &OTPRepositoryMock_UpdateCode_Call{Call: _e.mock.On("UpdateCode", ctx, id, code)}
+}
+
+func (_c *OTPRepositoryMock_UpdateCode_Call) Run(run func(ctx context.Context, id string, code string)) *OTPRepositoryMock_UpdateCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *OTPRepositoryMock_UpdateCode_Call) Return(_a0 error) *OTPRepositoryMock_UpdateCode_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *OTPRepositoryMock_UpdateCode_Call) RunAndReturn(run func(context.Context, string, string) error) *OTPRepositoryMock_UpdateCode_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewOTPRepositoryMock creates a new instance of OTPRepositoryMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewOTPRepositoryMock(t interface {

@@ -82,6 +82,53 @@ func (_c *AuthServiceMock_Authenticate_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
+// ResendVerificationCode provides a mock function with given fields: ctx, otpID
+func (_m *AuthServiceMock) ResendVerificationCode(ctx context.Context, otpID string) error {
+	ret := _m.Called(ctx, otpID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResendVerificationCode")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, otpID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// AuthServiceMock_ResendVerificationCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResendVerificationCode'
+type AuthServiceMock_ResendVerificationCode_Call struct {
+	*mock.Call
+}
+
+// ResendVerificationCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - otpID string
+func (_e *AuthServiceMock_Expecter) ResendVerificationCode(ctx interface{}, otpID interface{}) *AuthServiceMock_ResendVerificationCode_Call {
+	return &AuthServiceMock_ResendVerificationCode_Call{Call: _e.mock.On("ResendVerificationCode", ctx, otpID)}
+}
+
+func (_c *AuthServiceMock_ResendVerificationCode_Call) Run(run func(ctx context.Context, otpID string)) *AuthServiceMock_ResendVerificationCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *AuthServiceMock_ResendVerificationCode_Call) Return(_a0 error) *AuthServiceMock_ResendVerificationCode_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *AuthServiceMock_ResendVerificationCode_Call) RunAndReturn(run func(context.Context, string) error) *AuthServiceMock_ResendVerificationCode_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SendVerificationCode provides a mock function with given fields: ctx, email
 func (_m *AuthServiceMock) SendVerificationCode(ctx context.Context, email string) (*models.SendVerificationCodeResponse, error) {
 	ret := _m.Called(ctx, email)

@@ -49,7 +49,7 @@ func TestSendVerificationCode(t *testing.T) {
 
 		mockOTPService := mocks.NewOTPServiceMock(t)
 		mockOTPService.EXPECT().
-			CreateOTP(ctx, userID.Hex()).
+			CreateOTP(ctx, userID.Hex(), email).
 			Return(otp, nil)
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
@@ -146,7 +146,7 @@ func TestSendVerificationCode(t *testing.T) {
 
 		mockOTPService := mocks.NewOTPServiceMock(t)
 		mockOTPService.EXPECT().
-			CreateOTP(ctx, userID.Hex()).
+			CreateOTP(ctx, userID.Hex(), email).
 			Return(nil, expectedError)
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
@@ -196,7 +196,7 @@ func TestSendVerificationCode(t *testing.T) {
 
 		mockOTPService := mocks.NewOTPServiceMock(t)
 		mockOTPService.EXPECT().
-			CreateOTP(ctx, userID.Hex()).
+			CreateOTP(ctx, userID.Hex(), email).
 			Return(otp, nil)
 
 		mockJWTService := mocks.NewJWTServiceMock(t)

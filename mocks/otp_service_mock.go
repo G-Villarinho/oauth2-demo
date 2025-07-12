@@ -22,9 +22,9 @@ func (_m *OTPServiceMock) EXPECT() *OTPServiceMock_Expecter {
 	return &OTPServiceMock_Expecter{mock: &_m.Mock}
 }
 
-// CreateOTP provides a mock function with given fields: ctx, userID
-func (_m *OTPServiceMock) CreateOTP(ctx context.Context, userID string) (*entities.OTP, error) {
-	ret := _m.Called(ctx, userID)
+// CreateOTP provides a mock function with given fields: ctx, userID, email
+func (_m *OTPServiceMock) CreateOTP(ctx context.Context, userID string, email string) (*entities.OTP, error) {
+	ret := _m.Called(ctx, userID, email)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateOTP")
@@ -32,19 +32,19 @@ func (_m *OTPServiceMock) CreateOTP(ctx context.Context, userID string) (*entiti
 
 	var r0 *entities.OTP
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*entities.OTP, error)); ok {
-		return rf(ctx, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*entities.OTP, error)); ok {
+		return rf(ctx, userID, email)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *entities.OTP); ok {
-		r0 = rf(ctx, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *entities.OTP); ok {
+		r0 = rf(ctx, userID, email)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entities.OTP)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, userID, email)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -60,13 +60,14 @@ type OTPServiceMock_CreateOTP_Call struct {
 // CreateOTP is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID string
-func (_e *OTPServiceMock_Expecter) CreateOTP(ctx interface{}, userID interface{}) *OTPServiceMock_CreateOTP_Call {
-	return &OTPServiceMock_CreateOTP_Call{Call: _e.mock.On("CreateOTP", ctx, userID)}
+//   - email string
+func (_e *OTPServiceMock_Expecter) CreateOTP(ctx interface{}, userID interface{}, email interface{}) *OTPServiceMock_CreateOTP_Call {
+	return &OTPServiceMock_CreateOTP_Call{Call: _e.mock.On("CreateOTP", ctx, userID, email)}
 }
 
-func (_c *OTPServiceMock_CreateOTP_Call) Run(run func(ctx context.Context, userID string)) *OTPServiceMock_CreateOTP_Call {
+func (_c *OTPServiceMock_CreateOTP_Call) Run(run func(ctx context.Context, userID string, email string)) *OTPServiceMock_CreateOTP_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -76,7 +77,66 @@ func (_c *OTPServiceMock_CreateOTP_Call) Return(_a0 *entities.OTP, _a1 error) *O
 	return _c
 }
 
-func (_c *OTPServiceMock_CreateOTP_Call) RunAndReturn(run func(context.Context, string) (*entities.OTP, error)) *OTPServiceMock_CreateOTP_Call {
+func (_c *OTPServiceMock_CreateOTP_Call) RunAndReturn(run func(context.Context, string, string) (*entities.OTP, error)) *OTPServiceMock_CreateOTP_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ResendCode provides a mock function with given fields: ctx, otpID
+func (_m *OTPServiceMock) ResendCode(ctx context.Context, otpID string) (*entities.OTP, error) {
+	ret := _m.Called(ctx, otpID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResendCode")
+	}
+
+	var r0 *entities.OTP
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entities.OTP, error)); ok {
+		return rf(ctx, otpID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entities.OTP); ok {
+		r0 = rf(ctx, otpID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entities.OTP)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, otpID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OTPServiceMock_ResendCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResendCode'
+type OTPServiceMock_ResendCode_Call struct {
+	*mock.Call
+}
+
+// ResendCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - otpID string
+func (_e *OTPServiceMock_Expecter) ResendCode(ctx interface{}, otpID interface{}) *OTPServiceMock_ResendCode_Call {
+	return &OTPServiceMock_ResendCode_Call{Call: _e.mock.On("ResendCode", ctx, otpID)}
+}
+
+func (_c *OTPServiceMock_ResendCode_Call) Run(run func(ctx context.Context, otpID string)) *OTPServiceMock_ResendCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *OTPServiceMock_ResendCode_Call) Return(_a0 *entities.OTP, _a1 error) *OTPServiceMock_ResendCode_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *OTPServiceMock_ResendCode_Call) RunAndReturn(run func(context.Context, string) (*entities.OTP, error)) *OTPServiceMock_ResendCode_Call {
 	_c.Call.Return(run)
 	return _c
 }

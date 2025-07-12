@@ -15,6 +15,7 @@ type OTPRepository interface {
 	Create(ctx context.Context, otp *entities.OTP) error
 	FindByID(ctx context.Context, id string) (*entities.OTP, error)
 	Delete(ctx context.Context, id string) error
+	UpdateCode(ctx context.Context, id string, code string) error
 }
 
 type otpRepository struct {
@@ -60,6 +61,24 @@ func (r *otpRepository) FindByID(ctx context.Context, id string) (*entities.OTP,
 func (r *otpRepository) Delete(ctx context.Context, id string) error {
 	filter := bson.M{"_id": id}
 	_, err := r.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *otpRepository) UpdateCode(ctx context.Context, id string, code string) error {
+	filter := bson.M{"_id": id}
+
+	update := bson.M{
+		"$set": bson.M{
+			"code":      code,
+			"resend_at": time.Now(),
+		},
+	}
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}

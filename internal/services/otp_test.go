@@ -20,6 +20,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		userID := "507f1f77bcf86cd799439011"
+		email := "test@example.com"
 		userIDObj, _ := primitive.ObjectIDFromHex(userID)
 
 		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
@@ -38,12 +39,13 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, userID)
+		result, err := otpService.CreateOTP(ctx, userID, email)
 
 		// Assert
 		require.NoError(t, err)
 		assert.NotNil(t, result)
 		assert.Equal(t, userIDObj, result.UserID)
+		assert.Equal(t, email, result.Email)
 		assert.Len(t, result.Code, 6) // OTP deve ter 6 dígitos
 		assert.True(t, result.ExpiresAt.After(time.Now().UTC()))
 		assert.True(t, result.ExpiresAt.Before(time.Now().UTC().Add(11*time.Minute)))
@@ -53,6 +55,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		invalidUserID := "invalid-user-id"
+		email := "test@example.com"
 
 		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
 		config := configs.Environment{
@@ -64,7 +67,7 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, invalidUserID)
+		result, err := otpService.CreateOTP(ctx, invalidUserID, email)
 
 		// Assert
 		require.Error(t, err)
@@ -76,6 +79,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		userID := "507f1f77bcf86cd799439011"
+		email := "test@example.com"
 		userIDObj, _ := primitive.ObjectIDFromHex(userID)
 
 		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
@@ -94,7 +98,7 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, userID)
+		result, err := otpService.CreateOTP(ctx, userID, email)
 
 		// Assert
 		require.Error(t, err)
@@ -107,6 +111,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		userID := "507f1f77bcf86cd799439011"
+		email := "test@example.com"
 		userIDObj, _ := primitive.ObjectIDFromHex(userID)
 		expirationMinutes := 5 * time.Minute
 
@@ -126,7 +131,7 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, userID)
+		result, err := otpService.CreateOTP(ctx, userID, email)
 
 		// Assert
 		require.NoError(t, err)
@@ -142,6 +147,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		userID := "507f1f77bcf86cd799439011"
+		email := "test@example.com"
 		userIDObj, _ := primitive.ObjectIDFromHex(userID)
 
 		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
@@ -160,7 +166,7 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, userID)
+		result, err := otpService.CreateOTP(ctx, userID, email)
 
 		// Assert
 		require.NoError(t, err)
@@ -177,6 +183,7 @@ func TestCreateOTP(t *testing.T) {
 		// Arrange
 		ctx := context.Background()
 		emptyUserID := ""
+		email := "test@example.com"
 
 		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
 		config := configs.Environment{
@@ -188,12 +195,45 @@ func TestCreateOTP(t *testing.T) {
 		otpService := NewOTPService(mockOTPRepo, config)
 
 		// Act
-		result, err := otpService.CreateOTP(ctx, emptyUserID)
+		result, err := otpService.CreateOTP(ctx, emptyUserID, email)
 
 		// Assert
 		require.Error(t, err)
 		assert.Nil(t, result)
 		assert.Contains(t, err.Error(), "convert userID to ObjectID")
+	})
+
+	t.Run("should return error when email is empty", func(t *testing.T) {
+		// Arrange
+		ctx := context.Background()
+		userID := "507f1f77bcf86cd799439011"
+		emptyEmail := ""
+		userIDObj, _ := primitive.ObjectIDFromHex(userID)
+
+		mockOTPRepo := mocks.NewOTPRepositoryMock(t)
+		mockOTPRepo.EXPECT().
+			Create(ctx, mock.MatchedBy(func(otp *entities.OTP) bool {
+				return otp.UserID == userIDObj && otp.Email == emptyEmail
+			})).
+			Return(nil)
+
+		config := configs.Environment{
+			OTP: configs.OTP{
+				ExpirationMinutes: 10 * time.Minute,
+			},
+		}
+
+		otpService := NewOTPService(mockOTPRepo, config)
+
+		// Act
+		result, err := otpService.CreateOTP(ctx, userID, emptyEmail)
+
+		// Assert
+		require.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Equal(t, userIDObj, result.UserID)
+		assert.Equal(t, emptyEmail, result.Email)
+		assert.Len(t, result.Code, 6)
 	})
 }
 

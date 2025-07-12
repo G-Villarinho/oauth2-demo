@@ -16,6 +16,7 @@ import (
 type AuthHandler interface {
 	Login(ectx echo.Context) error
 	Authenticate(ectx echo.Context) error
+	ResendVerificationCode(ectx echo.Context) error
 }
 
 type authHandler struct {
@@ -115,4 +116,35 @@ func (h *authHandler) Authenticate(ectx echo.Context) error {
 	h.cookieMiddleware.SetCookie(ectx, response.AccessToken, maxAge)
 
 	return ectx.JSON(http.StatusOK, response)
+}
+
+func (h *authHandler) ResendVerificationCode(ectx echo.Context) error {
+	logger := slog.With(
+		slog.String("handler", "auth"),
+		slog.String("method", "resend verification code"),
+	)
+
+	otpID := middlewares.GetOTPJTI(ectx)
+	if otpID == "" {
+		logger.Error("otp id not found")
+		return echo.ErrUnauthorized
+	}
+
+	err := h.authService.ResendVerificationCode(ectx.Request().Context(), otpID)
+	if err != nil {
+		if errors.Is(err, domain.ErrOTPNotResendable) {
+			logger.Error(err.Error())
+			return echo.ErrTooManyRequests
+		}
+
+		if errors.Is(err, domain.ErrOTPNotFound) {
+			logger.Error(err.Error())
+			return echo.ErrUnauthorized
+		}
+
+		logger.Error("resend verification code", "error", err)
+		return echo.ErrInternalServerError
+	}
+
+	return ectx.NoContent(http.StatusNoContent)
 }

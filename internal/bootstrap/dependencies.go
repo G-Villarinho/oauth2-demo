@@ -11,6 +11,7 @@ import (
 )
 
 func BuildContainer(container *dig.Container) {
+
 	// Handlers
 	injector.Provide(container, handlers.NewAuthHandler)
 	injector.Provide(container, handlers.NewClientHandler)
