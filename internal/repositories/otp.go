@@ -45,13 +45,17 @@ func (r *otpRepository) Create(ctx context.Context, otp *entities.OTP) error {
 func (r *otpRepository) FindByID(ctx context.Context, id string) (*entities.OTP, error) {
 	var otp entities.OTP
 
-	filter := bson.M{"_id": id}
-	err := r.collection.FindOne(ctx, filter).Decode(&otp)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, domain.ErrInvalidObjectID
+	}
+
+	filter := bson.M{"_id": objectID}
+	err = r.collection.FindOne(ctx, filter).Decode(&otp)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, domain.ErrOTPNotFound
 		}
-
 		return nil, err
 	}
 
@@ -59,8 +63,13 @@ func (r *otpRepository) FindByID(ctx context.Context, id string) (*entities.OTP,
 }
 
 func (r *otpRepository) Delete(ctx context.Context, id string) error {
-	filter := bson.M{"_id": id}
-	_, err := r.collection.DeleteOne(ctx, filter)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.ErrInvalidObjectID
+	}
+
+	filter := bson.M{"_id": objectID}
+	_, err = r.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -69,7 +78,12 @@ func (r *otpRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *otpRepository) UpdateCode(ctx context.Context, id string, code string) error {
-	filter := bson.M{"_id": id}
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.ErrInvalidObjectID
+	}
+
+	filter := bson.M{"_id": objectID}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -78,7 +92,7 @@ func (r *otpRepository) UpdateCode(ctx context.Context, id string, code string) 
 		},
 	}
 
-	_, err := r.collection.UpdateOne(ctx, filter, update)
+	_, err = r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/aetheris-lab/aetheris-id/api/configs"
@@ -66,6 +67,8 @@ func (s *oauthService) Authorize(ctx context.Context, input models.AuthorizeInpu
 	if err := s.validateOAuthParameters(client, input); err != nil {
 		return nil, fmt.Errorf("validate request: %w", err)
 	}
+
+	fmt.Println("input.scope", input.Scope)
 
 	authorizationCodeInput := models.CreateAuthorizationCodeInput{
 		UserID:              input.UserID,
@@ -177,7 +180,7 @@ func (s *oauthService) authorizeURL(input models.AuthorizeInput) (string, error)
 		return "", fmt.Errorf("invalid base url: %w", err)
 	}
 
-	baseURL.Path = "/oauth/authorize"
+	baseURL.Path = "api/v1/oauth/authorize"
 
 	query := baseURL.Query()
 	query.Set("client_id", input.ClientID)
@@ -185,6 +188,7 @@ func (s *oauthService) authorizeURL(input models.AuthorizeInput) (string, error)
 	query.Set("response_type", input.ResponseType)
 	query.Set("code_challenge", input.CodeChallenge)
 	query.Set("code_challenge_method", input.CodeChallengeMethod)
+	query.Set("scope", strings.Join(input.Scope, " "))
 	query.Set("state", input.State)
 
 	baseURL.RawQuery = query.Encode()

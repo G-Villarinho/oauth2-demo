@@ -39,6 +39,9 @@ var (
 	ErrRefreshTokenNotFound = errors.New("refresh token not found")
 	ErrRefreshTokenExpired  = errors.New("refresh token expired")
 	ErrRefreshTokenRevoked  = errors.New("refresh token revoked")
+
+	// ObjectID
+	ErrInvalidObjectID = errors.New("invalid object id")
 )
 
 type ErrOTPNotResendable struct {

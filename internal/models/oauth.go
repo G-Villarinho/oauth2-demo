@@ -1,13 +1,15 @@
 package models
 
+import "strings"
+
 type AuthorizePayload struct {
-	ClientID            string   `query:"client_id" validate:"required"`
-	RedirectURI         string   `query:"redirect_uri" validate:"required"`
-	ResponseType        string   `query:"response_type" validate:"required"`
-	Scope               []string `query:"scope" validate:"required"`
-	State               string   `query:"state" validate:"required"`
-	CodeChallenge       string   `query:"code_challenge" validate:"required"`
-	CodeChallengeMethod string   `query:"code_challenge_method" validate:"required"`
+	ClientID            string `query:"client_id" validate:"required"`
+	RedirectURI         string `query:"redirect_uri" validate:"required"`
+	ResponseType        string `query:"response_type" validate:"required"`
+	Scope               string `query:"scope" validate:"required"`
+	State               string `query:"state" validate:"required"`
+	CodeChallenge       string `query:"code_challenge" validate:"required"`
+	CodeChallengeMethod string `query:"code_challenge_method" validate:"required"`
 }
 
 type ExchangeAuthorizationCodePayload struct {
@@ -55,6 +57,7 @@ func NewAuthorizeInput(payload AuthorizePayload, userID string) AuthorizeInput {
 		CodeChallenge:       payload.CodeChallenge,
 		CodeChallengeMethod: payload.CodeChallengeMethod,
 		State:               payload.State,
+		Scope:               strings.Split(payload.Scope, " "),
 		UserID:              userID,
 	}
 }

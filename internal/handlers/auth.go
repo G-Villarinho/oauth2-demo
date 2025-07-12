@@ -19,6 +19,7 @@ type AuthHandler interface {
 	Login(ectx echo.Context) error
 	Authenticate(ectx echo.Context) error
 	ResendVerificationCode(ectx echo.Context) error
+	Register(ectx echo.Context) error
 }
 
 type authHandler struct {
@@ -102,12 +103,12 @@ func (h *authHandler) Authenticate(ectx echo.Context) error {
 
 		if errors.Is(err, domain.ErrInvalidCode) {
 			logger.Error(err.Error())
-			return echo.ErrUnauthorized
+			return echo.ErrBadRequest
 		}
 
 		if errors.Is(err, domain.ErrOTPExpired) {
 			logger.Error(err.Error())
-			return echo.ErrUnauthorized
+			return echo.ErrBadRequest
 		}
 
 		logger.Error("authenticate", "error", err)
@@ -153,4 +154,38 @@ func (h *authHandler) ResendVerificationCode(ectx echo.Context) error {
 	}
 
 	return ectx.NoContent(http.StatusNoContent)
+}
+
+func (h *authHandler) Register(ectx echo.Context) error {
+	logger := slog.With(
+		slog.String("handler", "auth"),
+		slog.String("method", "register"),
+	)
+
+	var payload models.RegisterPayload
+	if err := ectx.Bind(&payload); err != nil {
+		logger.Error("bind payload", "error", err)
+		return echo.ErrBadRequest
+	}
+
+	if err := ectx.Validate(payload); err != nil {
+		logger.Error("validate payload", "error", err)
+		return err
+	}
+
+	response, err := h.authService.Register(ectx.Request().Context(), payload.FirstName, payload.LastName, payload.Email)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserAlreadyRegistered) {
+			logger.Error(err.Error())
+			return echo.ErrBadRequest
+		}
+
+		logger.Error("register", "error", err)
+		return echo.ErrInternalServerError
+	}
+
+	maxAge := int(response.ExpiresAt.Sub(time.Now().UTC()).Seconds())
+	h.cookieMiddleware.SetCookie(ectx, response.OTPToken, maxAge)
+
+	return ectx.JSON(http.StatusOK, response)
 }

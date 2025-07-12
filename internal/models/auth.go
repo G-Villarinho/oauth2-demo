@@ -10,6 +10,12 @@ type AuthenticatePayload struct {
 	Code string `json:"code" validate:"required"`
 }
 
+type RegisterPayload struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+}
+
 type SendVerificationCodeResponse struct {
 	OTPToken  string
 	ExpiresAt time.Time

@@ -36,6 +36,7 @@ func registerAuthRoutes(group *echo.Group, h handlers.AuthHandler, authMiddlewar
 	authGroup := group.Group("/auth")
 
 	authGroup.POST("/login", h.Login)
+	authGroup.POST("/register", h.Register)
 	authGroup.POST("/authenticate", h.Authenticate, authMiddleware.EnsureOTPAuthenticated())
 	authGroup.POST("/code/resend", h.ResendVerificationCode, authMiddleware.EnsureOTPAuthenticated())
 }

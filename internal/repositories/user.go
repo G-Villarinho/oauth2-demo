@@ -60,8 +60,13 @@ func (u *userRepository) FindByEmail(ctx context.Context, email string) (*entiti
 func (u *userRepository) FindByID(ctx context.Context, id string) (*entities.User, error) {
 	var user entities.User
 
-	filter := bson.M{"_id": id}
-	err := u.collection.FindOne(ctx, filter).Decode(&user)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, domain.ErrInvalidObjectID
+	}
+
+	filter := bson.M{"_id": objectID}
+	err = u.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
