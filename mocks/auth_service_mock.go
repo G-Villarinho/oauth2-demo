@@ -82,6 +82,67 @@ func (_c *AuthServiceMock_Authenticate_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
+// Register provides a mock function with given fields: ctx, firstName, lastName, email
+func (_m *AuthServiceMock) Register(ctx context.Context, firstName string, lastName string, email string) (*models.SendVerificationCodeResponse, error) {
+	ret := _m.Called(ctx, firstName, lastName, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Register")
+	}
+
+	var r0 *models.SendVerificationCodeResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (*models.SendVerificationCodeResponse, error)); ok {
+		return rf(ctx, firstName, lastName, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) *models.SendVerificationCodeResponse); ok {
+		r0 = rf(ctx, firstName, lastName, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.SendVerificationCodeResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, firstName, lastName, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AuthServiceMock_Register_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Register'
+type AuthServiceMock_Register_Call struct {
+	*mock.Call
+}
+
+// Register is a helper method to define mock.On call
+//   - ctx context.Context
+//   - firstName string
+//   - lastName string
+//   - email string
+func (_e *AuthServiceMock_Expecter) Register(ctx interface{}, firstName interface{}, lastName interface{}, email interface{}) *AuthServiceMock_Register_Call {
+	return &AuthServiceMock_Register_Call{Call: _e.mock.On("Register", ctx, firstName, lastName, email)}
+}
+
+func (_c *AuthServiceMock_Register_Call) Run(run func(ctx context.Context, firstName string, lastName string, email string)) *AuthServiceMock_Register_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *AuthServiceMock_Register_Call) Return(_a0 *models.SendVerificationCodeResponse, _a1 error) *AuthServiceMock_Register_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AuthServiceMock_Register_Call) RunAndReturn(run func(context.Context, string, string, string) (*models.SendVerificationCodeResponse, error)) *AuthServiceMock_Register_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ResendVerificationCode provides a mock function with given fields: ctx, otpID
 func (_m *AuthServiceMock) ResendVerificationCode(ctx context.Context, otpID string) error {
 	ret := _m.Called(ctx, otpID)

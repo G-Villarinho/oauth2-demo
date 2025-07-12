@@ -28,7 +28,7 @@ func NewServer(config *configs.Environment, clientHandler handlers.ClientHandler
 	s.configureMiddlewares(config)
 	s.configureValidator()
 	s.configureErrorHandler()
-	s.configureRoutes(clientHandler, authHandler, oauthHandler, authMiddleware)
+	s.configureRoutes(config, clientHandler, authHandler, oauthHandler, authMiddleware)
 
 	return s
 }
@@ -57,9 +57,10 @@ func (s *Server) configureMiddlewares(config *configs.Environment) {
 	}))
 
 	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: config.Cors.AllowedOrigins,
-		AllowMethods: config.Cors.AllowedMethods,
-		AllowHeaders: config.Cors.AllowedHeaders,
+		AllowOrigins:     config.Cors.AllowedOrigins,
+		AllowMethods:     config.Cors.AllowedMethods,
+		AllowHeaders:     config.Cors.AllowedHeaders,
+		AllowCredentials: true,
 	}))
 
 	s.echo.Use(middleware.BodyLimit("2M"))
@@ -78,7 +79,7 @@ func (s *Server) configureErrorHandler() {
 	s.echo.HTTPErrorHandler = api.CustomHTTPErrorHandler
 }
 
-func (s *Server) configureRoutes(clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, oauthHandler handlers.OAuthHandler, authMiddleware middlewares.AuthMiddleware) {
+func (s *Server) configureRoutes(config *configs.Environment, clientHandler handlers.ClientHandler, authHandler handlers.AuthHandler, oauthHandler handlers.OAuthHandler, authMiddleware middlewares.AuthMiddleware) {
 	apiGroup := s.echo.Group("/api/v1")
-	RegisterRoutes(apiGroup, clientHandler, authHandler, oauthHandler, authMiddleware)
+	RegisterRoutes(apiGroup, config, clientHandler, authHandler, oauthHandler, authMiddleware)
 }

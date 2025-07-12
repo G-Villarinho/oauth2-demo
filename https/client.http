@@ -10,11 +10,10 @@ POST {{baseUrl}}/api/{{apiVersion}}/clients
 Content-Type: {{contentType}}
 
 {
-    "name": "Meu Aplicativo Web",
-    "description": "Aplicação web para autenticação de usuários",
+    "name": "Nivo Web",
+    "description": "Aplicação web para envio de mensagens",
     "redirect_uris": [
-        "http://localhost:3000/callback",
-        "https://meuapp.com/auth/callback"
+        "http://localhost:3002/callback"
     ],
     "grant_types": [
         "authorization_code",

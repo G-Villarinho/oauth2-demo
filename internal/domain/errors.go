@@ -33,6 +33,7 @@ var (
 	ErrInvalidResponseType     = errors.New("invalid response type")
 	ErrUnauthorizedClient      = errors.New("unauthorized client")
 	ErrUnauthorizedRedirectURI = errors.New("unauthorized redirect uri")
+	ErrUserAlreadyRegistered   = errors.New("user already registered")
 
 	// Refresh Token
 	ErrRefreshTokenNotFound = errors.New("refresh token not found")
