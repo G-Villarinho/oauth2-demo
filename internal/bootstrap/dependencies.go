@@ -6,11 +6,15 @@ import (
 	"github.com/aetheris-lab/aetheris-id/api/internal/repositories"
 	"github.com/aetheris-lab/aetheris-id/api/internal/server"
 	"github.com/aetheris-lab/aetheris-id/api/internal/services"
+	"github.com/aetheris-lab/aetheris-id/api/pkg/ecdsa"
 	"github.com/aetheris-lab/aetheris-id/api/pkg/injector"
 	"go.uber.org/dig"
 )
 
 func BuildContainer(container *dig.Container) {
+
+	// Crypto
+	injector.Provide(container, ecdsa.NewEcdsaKeyPair)
 
 	// Handlers
 	injector.Provide(container, handlers.NewAuthHandler)

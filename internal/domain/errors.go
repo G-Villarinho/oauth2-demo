@@ -1,14 +1,17 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"time"
+)
 
 var (
 
 	// OTP
-	ErrOTPNotFound      = errors.New("otp not found")
-	ErrInvalidCode      = errors.New("invalid code")
-	ErrOTPExpired       = errors.New("otp expired")
-	ErrOTPNotResendable = errors.New("otp not resendable")
+	ErrOTPNotFound = errors.New("otp not found")
+	ErrInvalidCode = errors.New("invalid code")
+	ErrOTPExpired  = errors.New("otp expired")
 
 	// Client
 	ErrClientNotFound      = errors.New("client not found")
@@ -36,3 +39,11 @@ var (
 	ErrRefreshTokenExpired  = errors.New("refresh token expired")
 	ErrRefreshTokenRevoked  = errors.New("refresh token revoked")
 )
+
+type ErrOTPNotResendable struct {
+	TimeRemaining time.Duration
+}
+
+func (e *ErrOTPNotResendable) Error() string {
+	return fmt.Sprintf("otp not resendable, time remaining: %s", e.TimeRemaining)
+}

@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	otpLength = 6
-	otpChars  = "0123456789"
+	otpLength      = 6
+	otpChars       = "0123456789"
+	ResendCooldown = 60 * time.Second
 )
 
 type OTPService interface {
@@ -26,10 +27,10 @@ type OTPService interface {
 
 type otpService struct {
 	otpRepo repositories.OTPRepository
-	config  configs.Environment
+	config  *configs.Environment
 }
 
-func NewOTPService(otpRepo repositories.OTPRepository, config configs.Environment) OTPService {
+func NewOTPService(otpRepo repositories.OTPRepository, config *configs.Environment) OTPService {
 	return &otpService{
 		otpRepo: otpRepo,
 		config:  config,
@@ -80,7 +81,9 @@ func (s *otpService) ResendCode(ctx context.Context, otpID string) (*entities.OT
 	}
 
 	if !otp.IsResendable() {
-		return nil, domain.ErrOTPNotResendable
+		return nil, &domain.ErrOTPNotResendable{
+			TimeRemaining: ResendCooldown - time.Since(*otp.ResendAt),
+		}
 	}
 
 	otp.Code = s.generateOTP()

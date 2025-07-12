@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
 	"time"
 
@@ -132,7 +134,11 @@ func (h *authHandler) ResendVerificationCode(ectx echo.Context) error {
 
 	err := h.authService.ResendVerificationCode(ectx.Request().Context(), otpID)
 	if err != nil {
-		if errors.Is(err, domain.ErrOTPNotResendable) {
+		var errOTPNotResendable *domain.ErrOTPNotResendable
+		if errors.As(err, &errOTPNotResendable) {
+			remainingSeconds := int(math.Ceil(errOTPNotResendable.TimeRemaining.Seconds()))
+
+			ectx.Response().Header().Set("Retry-After", fmt.Sprintf("%d", remainingSeconds))
 			logger.Error(err.Error())
 			return echo.ErrTooManyRequests
 		}

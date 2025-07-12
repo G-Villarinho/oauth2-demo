@@ -36,7 +36,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, userID, email)
@@ -64,7 +64,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, invalidUserID, email)
@@ -95,7 +95,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, userID, email)
@@ -128,7 +128,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, userID, email)
@@ -163,7 +163,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, userID, email)
@@ -192,7 +192,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, emptyUserID, email)
@@ -223,7 +223,7 @@ func TestCreateOTP(t *testing.T) {
 			},
 		}
 
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		// Act
 		result, err := otpService.CreateOTP(ctx, userID, emptyEmail)
@@ -253,7 +253,7 @@ func TestValidateCode(t *testing.T) {
 		mockOTPRepo.EXPECT().Delete(ctx, otpID).Return(nil)
 
 		config := configs.Environment{}
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		result, err := otpService.ValidateCode(ctx, code, otpID)
 
@@ -271,7 +271,7 @@ func TestValidateCode(t *testing.T) {
 		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(nil, errNotFound)
 
 		config := configs.Environment{}
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		result, err := otpService.ValidateCode(ctx, code, otpID)
 
@@ -293,7 +293,7 @@ func TestValidateCode(t *testing.T) {
 		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
 
 		config := configs.Environment{}
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		result, err := otpService.ValidateCode(ctx, "123456", otpID)
 
@@ -315,7 +315,7 @@ func TestValidateCode(t *testing.T) {
 		mockOTPRepo.EXPECT().FindByID(ctx, otpID).Return(otp, nil)
 
 		config := configs.Environment{}
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		result, err := otpService.ValidateCode(ctx, "123456", otpID)
 
@@ -339,7 +339,7 @@ func TestValidateCode(t *testing.T) {
 		mockOTPRepo.EXPECT().Delete(ctx, otpID).Return(errors.New("delete error"))
 
 		config := configs.Environment{}
-		otpService := NewOTPService(mockOTPRepo, config)
+		otpService := NewOTPService(mockOTPRepo, &config)
 
 		result, err := otpService.ValidateCode(ctx, code, otpID)
 

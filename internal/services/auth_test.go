@@ -59,7 +59,7 @@ func TestSendVerificationCode(t *testing.T) {
 
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -85,7 +85,7 @@ func TestSendVerificationCode(t *testing.T) {
 		mockJWTService := mocks.NewJWTServiceMock(t)
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -112,7 +112,7 @@ func TestSendVerificationCode(t *testing.T) {
 		mockJWTService := mocks.NewJWTServiceMock(t)
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -152,7 +152,7 @@ func TestSendVerificationCode(t *testing.T) {
 		mockJWTService := mocks.NewJWTServiceMock(t)
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -206,7 +206,7 @@ func TestSendVerificationCode(t *testing.T) {
 
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -232,7 +232,7 @@ func TestSendVerificationCode(t *testing.T) {
 		mockJWTService := mocks.NewJWTServiceMock(t)
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -259,7 +259,7 @@ func TestSendVerificationCode(t *testing.T) {
 		mockJWTService := mocks.NewJWTServiceMock(t)
 		config := configs.Environment{}
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.SendVerificationCode(ctx, email)
@@ -306,7 +306,7 @@ func TestAuthenticate(t *testing.T) {
 			GenerateAccessTokenJWT(ctx, userID.Hex(), mock.AnythingOfType("time.Time")).
 			Return(expectedToken, nil)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -340,7 +340,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -373,7 +373,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -406,7 +406,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -451,7 +451,7 @@ func TestAuthenticate(t *testing.T) {
 			GenerateAccessTokenJWT(ctx, userID.Hex(), mock.AnythingOfType("time.Time")).
 			Return("", expectedError)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -484,7 +484,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -517,7 +517,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -551,7 +551,7 @@ func TestAuthenticate(t *testing.T) {
 
 		mockJWTService := mocks.NewJWTServiceMock(t)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)
@@ -597,7 +597,7 @@ func TestAuthenticate(t *testing.T) {
 			GenerateAccessTokenJWT(ctx, userID.Hex(), mock.AnythingOfType("time.Time")).
 			Return(expectedToken, nil)
 
-		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, config)
+		authService := NewAuthService(mockUserRepo, mockOTPService, mockJWTService, &config)
 
 		// Act
 		result, err := authService.Authenticate(ctx, code, otpID)

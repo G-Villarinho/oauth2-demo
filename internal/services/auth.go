@@ -20,10 +20,10 @@ type authService struct {
 	userRepo   repositories.UserRepository
 	otpService OTPService
 	jwtService JWTService
-	config     configs.Environment
+	config     *configs.Environment
 }
 
-func NewAuthService(userRepo repositories.UserRepository, otpService OTPService, jwtService JWTService, config configs.Environment) AuthService {
+func NewAuthService(userRepo repositories.UserRepository, otpService OTPService, jwtService JWTService, config *configs.Environment) AuthService {
 	return &authService{
 		userRepo:   userRepo,
 		otpService: otpService,
@@ -78,7 +78,7 @@ func (s *authService) Authenticate(ctx context.Context, code, otpID string) (*mo
 func (s *authService) ResendVerificationCode(ctx context.Context, otpID string) error {
 	_, err := s.otpService.ResendCode(ctx, otpID)
 	if err != nil {
-		return fmt.Errorf("resend otp: %w", err)
+		return fmt.Errorf("resend verification code: %w", err)
 	}
 
 	// TODO: Send email with new token
