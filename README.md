@@ -1,4 +1,4 @@
-# Aetheris ID - Servidor de Identidade OAuth2
+# OAuth2-demo - Servidor de Identidade OAuth2
 
 [![Go Version](https://img.shields.io/badge/Go-1.24.2+-blue.svg)](https://golang.org/)
 [![Echo Framework](https://img.shields.io/badge/Echo-v4.13.4-green.svg)](https://echo.labstack.com/)
