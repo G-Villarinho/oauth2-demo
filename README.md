@@ -74,7 +74,7 @@ O Aetheris ID implementa o fluxo OAuth 2.0 Authorization Code com PKCE, conforme
 ### 1. Clone o repositório
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/G-Villarinho/oauth2-demo.git
 cd aetheris-id
 ```
 
