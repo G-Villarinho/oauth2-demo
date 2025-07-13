@@ -45,4 +45,5 @@ func registerOAuthRoutes(group *echo.Group, h handlers.OAuthHandler, authMiddlew
 	oauthGroup := group.Group("/oauth")
 
 	oauthGroup.GET("/authorize", h.Authorize, authMiddleware.AttachUserClaimsIfAuthenticated())
+	oauthGroup.POST("/token", h.Token)
 }

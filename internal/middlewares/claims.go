@@ -58,5 +58,5 @@ func GetUserID(ectx echo.Context) string {
 		return ""
 	}
 
-	return user.ID
+	return user.Subject
 }

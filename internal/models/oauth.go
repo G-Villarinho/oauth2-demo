@@ -61,3 +61,12 @@ func NewAuthorizeInput(payload AuthorizePayload, userID string) AuthorizeInput {
 		UserID:              userID,
 	}
 }
+
+func NewExchangeAuthorizationCodeInput(payload ExchangeAuthorizationCodePayload) ExchangeAuthorizationCodeInput {
+	return ExchangeAuthorizationCodeInput{
+		Code:         payload.Code,
+		CodeVerifier: payload.CodeVerifier,
+		ClientID:     payload.ClientID,
+		RedirectURI:  payload.RedirectURI,
+	}
+}

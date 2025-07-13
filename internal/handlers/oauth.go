@@ -14,6 +14,7 @@ import (
 
 type OAuthHandler interface {
 	Authorize(ectx echo.Context) error
+	Token(ectx echo.Context) error
 }
 
 type oauthHandler struct {
@@ -73,4 +74,33 @@ func (h *oauthHandler) Authorize(ectx echo.Context) error {
 	}
 
 	return ectx.Redirect(http.StatusFound, response.RedirectURL)
+}
+
+func (h *oauthHandler) Token(ectx echo.Context) error {
+	logger := slog.With(
+		slog.String("handler", "oauth"),
+		slog.String("method", ectx.Request().Method),
+		slog.String("path", ectx.Request().URL.Path),
+	)
+
+	var payload models.ExchangeAuthorizationCodePayload
+	if err := ectx.Bind(&payload); err != nil {
+		logger.Error("failed to bind input", "error", err)
+		return echo.ErrBadRequest
+	}
+
+	if err := ectx.Validate(payload); err != nil {
+		logger.Error("failed to validate payload", "error", err)
+		return err
+	}
+
+	input := models.NewExchangeAuthorizationCodeInput(payload)
+
+	response, err := h.oauthService.ExchangeCodeForToken(ectx.Request().Context(), input)
+	if err != nil {
+		logger.Error("failed to exchange code for token", "error", err)
+		return echo.ErrInternalServerError
+	}
+
+	return ectx.JSON(http.StatusOK, response)
 }
